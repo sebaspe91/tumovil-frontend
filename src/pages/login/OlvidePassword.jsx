@@ -1,6 +1,65 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import Alerta from "../../components/Alerta";
+import clienteAxios from "../../config/axios";
 
 function OlvidePassword() {
+
+    // state
+    const [correo_user, setCorreo_user] = useState('');
+    const [alerta, setAlerta] = useState({});
+
+    // test correo
+    function validarCorreo(correo) {
+        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailRegex.test(correo);
+    }
+
+    // evento submit
+    const handleSubmit = async e => {
+        e.preventDefault();
+
+        // validacion de campos
+        if (correo_user === '') {
+        return setAlerta({
+            msg: "El campo debe de estar debidamente deligenciado",
+            error: true
+        });
+        }
+
+        // validar correo
+        const testCorreo = validarCorreo(correo_user);
+        if (!testCorreo) {
+        return setAlerta({
+            msg: 'El correo no tiene un formato válido (ej: correo@correo.com)', 
+            error: true
+        });
+        
+        }
+
+        // Validacion correcta
+
+        setAlerta({});
+
+        try {
+        const url = "usuarios/olvide-password";
+        const {data} = await clienteAxios.post(url, {correo_user});
+
+        // mostrar el mensjae
+        setAlerta({
+            msg: data.msg,
+            error: false
+        });
+        } catch (error) {
+        setAlerta({
+            msg: error.response.data.msg,
+            error: true
+        });
+        }
+    }
+
+    const {msg} = alerta;
+
   return (
     <>
         <div>
@@ -8,8 +67,13 @@ function OlvidePassword() {
         </div> 
 
         <div className="mt-20 md:mt-5 shadow-lg px-5 py-10 rounded-xl bg-white">
+
+            {msg && <Alerta alerta={alerta}/>}
             
-            <form action="">
+            <form 
+                action=""
+                onSubmit={handleSubmit}
+            >
 
                 {/* Email */}
                 <div className="my-5">
@@ -19,9 +83,11 @@ function OlvidePassword() {
 
                     <input 
                         type="email" 
-                        name="email"
+                        name="correo_user"
                         placeholder="Email de Registro"
                         className="border w-full p-3 mt-3 bg-gray-50 rounded-xl"
+                        value={correo_user}
+                        onChange={e => setCorreo_user(e.target.value)}
                     />
                 </div>
 
