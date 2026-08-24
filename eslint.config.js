@@ -17,5 +17,11 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // Variables/argumentos que empiezan con "_" son intencionalmente
+      // ignorados (ej: cuando se destructura solo para excluir una llave
+      // de un objeto, como en { password: _password, ...resto }).
+      'no-unused-vars': ['warn', { varsIgnorePattern: '^_', argsIgnorePattern: '^_' }],
+    },
   },
 ])

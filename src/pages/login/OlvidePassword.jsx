@@ -19,6 +19,11 @@ function OlvidePassword() {
     const handleSubmit = async e => {
         e.preventDefault();
 
+        setTimeout(() => {
+            setAlerta({});
+        }, 3000);
+
+
         // validacion de campos
         if (correo_user === '') {
         return setAlerta({

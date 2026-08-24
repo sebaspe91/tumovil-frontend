@@ -1,10 +1,13 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; 
 import clienteAxios from "../../config/axios";
 import Alerta from "../../components/Alerta";
 
 function NuevoPassword() {
 
+  const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [mostrarRepetirPassword, setMostrarRepetirPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [repetirPassword, setRepetirPassword] = useState('');
   const [alerta, setAlerta] = useState({});
@@ -43,6 +46,11 @@ function NuevoPassword() {
     const tieneCaracterEspecial = /[-+!@#$%^&*(),.?":|]/.test(password);
     const tieneMinimo4 = password.length >= 4;
 
+    setTimeout(() => {
+      setAlerta({});
+    }, 3000);
+
+
     if (password === "" || repetirPassword === "") {
       return setAlerta({ msg: 'Todos los campos son obligatorios', error: true });
     }
@@ -67,6 +75,7 @@ function NuevoPassword() {
       setPasswordModificado(true);
 
     } catch (error) {
+      console.log(error);
       setAlerta({
         msg: error.response?.data?.msg || 'Hubo un error al actualizar tu password',
         error: true
@@ -92,28 +101,52 @@ function NuevoPassword() {
               <label className="uppercase text-gray-600 block txt-xl font-bold">
                 Nuevo Password
               </label>
-              <input
-                type="password"
-                name="password"
-                placeholder="Ingrese su Contraseña"
-                className="border w-full p-3 mt-3 bg-gray-50 rounded-xl"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-              />
+
+              <div className="relative">
+                <input
+                  type={mostrarPassword ? 'text' : 'password'}
+                  name="password"
+                  placeholder="Ingrese su Contraseña"
+                  className="border w-full p-3 mt-3 bg-gray-50 rounded-xl pr-12"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                />
+
+                <button
+                    type="button"
+                    onClick={() => setMostrarPassword(!mostrarPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                >
+                    {mostrarPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+
             </div>
 
             <div className="my-5">
               <label className="uppercase text-gray-600 block txt-xl font-bold">
                 Repetir Nuevo Password
               </label>
-              <input
-                type="password"
-                name="Repetirpassword"
-                placeholder="Ingrese su Contraseña"
-                className="border w-full p-3 mt-3 bg-gray-50 rounded-xl"
-                value={repetirPassword}
-                onChange={e => setRepetirPassword(e.target.value)}
-              />
+
+              <div className="relative">
+                <input
+                  type={mostrarRepetirPassword ? 'text' : 'password'}
+                  name="Repetirpassword"
+                  placeholder="Ingrese su Contraseña"
+                  className="border w-full p-3 mt-3 bg-gray-50 rounded-xl pr-12"
+                  value={repetirPassword}
+                  onChange={e => setRepetirPassword(e.target.value)}
+                />
+            
+                <button
+                    type="button"
+                    onClick={() => setMostrarRepetirPassword(!mostrarRepetirPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                >
+                    {mostrarRepetirPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+
             </div>
 
             <input
