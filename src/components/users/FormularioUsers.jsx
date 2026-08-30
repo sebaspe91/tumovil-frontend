@@ -10,7 +10,7 @@ function FormularioUsers() {
     // contexto (UsersProvider), no aca -- si fueran estado local, se
     // perderian cuando guardarUsuario fuerza el remontaje de este
     // componente al terminar de guardar (ver el key en AdminUsers.jsx)
-    const {guardarUsuario, usuario, alerta, setAlerta} = useUsers();
+    const {guardarUsuario, usuario, alerta, setAlerta, cerrarModalFormulario} = useUsers();
 
     const [mostrarPassword, setMostrarPassword] = useState(false);
     const [mostrarRepetirPassword, setMostrarRepetirPassword] = useState(false);
@@ -113,7 +113,19 @@ function FormularioUsers() {
 
         setAlerta(resultado);
 
-        setUsuarioRegistrar({});
+        // si el backend respondio con un error (por ejemplo "el correo ya
+        // esta registrado"), dejamos el modal abierto y los datos tal cual
+        // los escribio el usuario, para que los pueda corregir sin tener
+        // que volver a escribir todo -- antes esta linea limpiaba el
+        // formulario SIEMPRE, incluso cuando algo habia salido mal
+        if (resultado?.error) return;
+
+        // si todo salio bien, mostramos el mensaje de exito un momento y
+        // despues cerramos el modal (cerrarModalFormulario tambien limpia
+        // el usuario seleccionado y la alerta en el contexto)
+        setTimeout(() => {
+            cerrarModalFormulario();
+        }, 1200);
     }
 
 
@@ -121,14 +133,9 @@ function FormularioUsers() {
 
   return (
     <>
-        <h2 className="text-primary-700 font-black text-3xl text-center">
-            {modoEdicion ? 'Edita el Usuario' : 'Registra Tus Usuarios'}
-        </h2>
-
-        <p className="text-xl mt-5 mb-10 text-center">Añade tus Usuarios y {' '}<span className="text-primary-600 font-bold">Administralos</span></p>
-
-        <form 
-            className="bg-white py-10 px-5 mb-10 lg:mb-5 shadow-md rounded-md"
+        {/* El titulo (Registrar/Editar) ya lo muestra el encabezado del
+            Modal en AdminUsers.jsx, por eso aca no se repite */}
+        <form
             onSubmit={handleSubmit}
         >
             {/* nombre usuario */}
@@ -284,6 +291,12 @@ function FormularioUsers() {
                     }
                 />
             </div>
+        
+            {msg && 
+                <Alerta 
+                    alerta={alerta}
+                />
+            }
 
             {/* boton Submit */}
             <input
@@ -291,12 +304,6 @@ function FormularioUsers() {
                 value={modoEdicion ? 'Editar Usuario' : 'Registrar Usuario'}
                 className="bg-primary-700 w-full py-3 px-10 rounded-xl text-white uppercase font-bold mt-5 hover:cursor-pointer hover:bg-primary-800"
             />
-
-            {msg && 
-                <Alerta 
-                    alerta={alerta}
-                />
-            }
 
         </form>
 

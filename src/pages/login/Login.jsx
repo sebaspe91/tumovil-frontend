@@ -88,7 +88,7 @@ function Login() {
             
         } catch (error) {
             setAlerta({
-                msg: error.response.data.msg,
+                msg: error.response?.data?.msg || 'Hubo un error al iniciar sesión',
                 error: true
             });
         }

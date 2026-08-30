@@ -1,35 +1,45 @@
-import { useState } from "react";
 import FormularioUsers from "../../components/users/FormularioUsers";
 import ListaUsuarios from "../../components/users/ListaUsuarios";
+import Modal from "../../components/Modal";
 import useUsers from "../../hook/useUsers";
 
 function AdminUsers() {
-    const [mostrarFormulario, setMostrarFormulario] = useState(false);
-    const {usuario} = useUsers(); // usuario seleccionado para editar (o {} si es "nuevo")
+    // usuario: usuario seleccionado para editar (o {} si es "nuevo")
+    // modalFormulario/nuevoUsuario/cerrarModalFormulario: controlan el modal
+    const {usuario, modalFormulario, nuevoUsuario, cerrarModalFormulario} = useUsers();
+
+    // si "usuario" trae id_usuario, estamos editando uno que ya existe;
+    // si no, el modal se abrio en modo "registrar uno nuevo"
+    const modoEdicion = Boolean(usuario?.id_usuario);
+
   return (
     <>
-      <div className="flex flex-col md:flex-row gap-10">
+        <div className="flex justify-center md:justify-end mb-6 md:mr-5">
             <button
-                type='button'
-                className='bg-primary-600 text-center text-white uppercase font-bold mx-10 p-3 rounded-md hover:bg-primary-800 md:hidden'
-                onClick={() => {setMostrarFormulario(!mostrarFormulario) /* Colocamos aca lo contrario del valor de mostrar formulario si esta en true pasa a false*/}}
+                type="button"
+                onClick={nuevoUsuario}
+                className="bg-primary-600 text-white uppercase font-bold px-6 py-3 rounded-md hover:bg-primary-800"
             >
-                {mostrarFormulario ? 'Ocultar Formulario' : 'Mostrar Formulario'}
+                + Nuevo Usuario
             </button>
+        </div>
 
-            <div className={`${mostrarFormulario ? 'block' : 'hidden' } md:block md:w-1/2 lg:w-2/5 lg:pl-5`}>
-                {/* 
-                    key fuerza a React a montar un FormularioUsers nuevo cada vez
-                    que cambia el usuario a editar (o vuelve a "nuevo"), en vez de
-                    reusar la misma instancia y tener que sincronizarla con un efecto 
-                */}
-                <FormularioUsers key={usuario?.id_usuario ?? 'nuevo'} />
-            </div>
+        <Modal
+            abierto={modalFormulario}
+            onClose={cerrarModalFormulario}
+            titulo={modoEdicion ? 'Edita el Usuario' : 'Registra Tus Usuarios'}
+        >
+            {/*
+                key fuerza a React a montar un FormularioUsers nuevo cada vez
+                que cambia el usuario a editar (o vuelve a "nuevo"), en vez de
+                reusar la misma instancia y tener que sincronizarla con un
+                efecto. Solo lo montamos mientras el modal esta abierto, para
+                no pedir datos de mas.
+            */}
+            {modalFormulario && <FormularioUsers key={usuario?.id_usuario ?? 'nuevo'} />}
+        </Modal>
 
-            <div className="md:w-1/2 lg:w-3/5">
-                <ListaUsuarios />
-            </div>
-      </div>
+        <ListaUsuarios />
     </>
   )
 }

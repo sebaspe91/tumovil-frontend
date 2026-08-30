@@ -57,7 +57,7 @@ function OlvidePassword() {
         });
         } catch (error) {
         setAlerta({
-            msg: error.response.data.msg,
+            msg: error.response?.data?.msg || 'Hubo un error al enviar las instrucciones',
             error: true
         });
         }

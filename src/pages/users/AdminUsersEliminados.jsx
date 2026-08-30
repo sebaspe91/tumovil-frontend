@@ -5,12 +5,9 @@ import ListaUsuariosEliminados from '../../components/users/ListaUsuariosElimina
 
 function AdminUsersEliminados() {
   return (
-    <div className='flex flex-col md:flex-row gap-10 w-full'>
-        <div>
-            <ListaUsuariosEliminados />
-        </div>
-      
-    </div>
+
+    <ListaUsuariosEliminados />
+
   )
 }
 
