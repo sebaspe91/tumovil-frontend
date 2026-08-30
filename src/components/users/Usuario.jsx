@@ -3,7 +3,7 @@ import useUsers from "../../hook/useUsers";
 
 
 function Usuario({usuario}) {
-    console.log(usuario)
+    
     // extrameos las funciones para los votones
     const {setEditarUser, setEliminarUser, setActivarUser} = useUsers();
 

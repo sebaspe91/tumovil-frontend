@@ -22,8 +22,11 @@ const menuItems = [
         id: 'perfil',
         label: 'Perfil',
         icon: FaUserCircle,
-        to: '/admin/perfil',
-        roles: ['ADMIN', 'VENDEDOR'] // ambos pueden verlo
+        roles: ['ADMIN', 'VENDEDOR'], // ambos pueden verlo
+        submenu: [
+            { label: 'Editar Perfil', to: '/admin-users/perfil', roles: ['ADMIN', 'VENDEDOR'] },
+            { label: 'Cambiar Password', to: '/admin-users/cambiar-password', roles: ['ADMIN', 'VENDEDOR'] },
+        ]
     },
     {
         id: 'usuarios', // valor unico
@@ -41,8 +44,8 @@ const menuItems = [
         icon: FaUserFriends,
         roles: ['ADMIN', 'VENDEDOR'], // SOLO admin
         submenu: [
-            { label: 'Lista de clientes', to: '/admin-clientes', roles: ['ADMIN', 'VENDEDOR'] },
-            { label: 'Crear clientes', to: '/admin-clientes/crear', roles: ['ADMIN', 'VENDEDOR'] },
+            { label: 'Lista de clientes', to: '/clientes', roles: ['ADMIN', 'VENDEDOR'] },
+            { label: 'Crear clientes', to: '/clientes/crear', roles: ['ADMIN', 'VENDEDOR'] },
         ]
     },
     {

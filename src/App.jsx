@@ -12,13 +12,20 @@ import Registrar from './pages/login/Registrar';
 import OlvidePassword from './pages/login/OlvidePassword';
 import NuevoPassword from './pages/login/NuevoPassword';
 import ConfirmarCuenta from './pages/login/ConfirmarCuenta';
+
 import AdminUsers from './pages/users/AdminUsers';
 import AdminUsersEliminados from './pages/users/AdminUsersEliminados';
+import EditarPerfil from './pages/users/EditarPerfil';
+import CambiarPassword from './pages/users/CambiarPassword';
+
+import AdminCliente from './pages/clientes/AdminCliente';
+
 import FacturaVenta from './pages/facturaVenta/FacturaVenta';
 
 import { AuthProvider } from './context/AuthProvider';
 import { UsersProvider } from './context/UsersProvider';
 import { FacturaVentaProvider } from './context/FacturaVentaProvider';
+import { ClientesProvider } from './context/ClientesProvider';
 
 
 function App() {
@@ -45,6 +52,22 @@ function App() {
               <Route path='factura-venta' element={
                 <FacturaVentaProvider> <FacturaVenta /> </FacturaVentaProvider>
               }/>
+
+              {/* usuarios */}
+              <Route path='admin-users/perfil' element={
+                <UsersProvider> <EditarPerfil /> </UsersProvider>
+              }/>
+
+              <Route path='admin-users/cambiar-password' element={
+                <UsersProvider> <CambiarPassword /> </UsersProvider>
+              }/>
+
+              {/* Clientes */}
+              <Route path='clientes' element={
+                <ClientesProvider> <AdminCliente /> </ClientesProvider>
+              }/>
+
+
 
               {/* Solo ADMIN */}
               <Route element={<RutaAdmin />}>

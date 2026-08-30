@@ -58,12 +58,82 @@ const AuthProvider = ({children}) => {
     }
 
     // Actualizar Perfil
+    const actualizarPerfil = async datos => {
+        const token = localStorage.getItem('token');
+        
+        // si no hay token para la ejecucion de este modulo y no inicia sesion
+        if (!token) {
+            setCargando(false);
+            return;
+        }
+
+        const config = {
+            headers: {
+                "Content-Type": "application/json", 
+                Authorization: `Bearer ${token}` 
+            }
+        }
+
+        try {
+            const url = `/usuarios/perfil/${datos.id_usuario}`;
+            const {data} = await clienteAxios.put(url, datos, config);
+
+            // el backend ya responde con el usuario actualizado (sin
+            // password ni token) -- lo guardamos en "auth" para que
+            // cualquier componente que lo use (como el Header) se
+            // refresque solo, sin recargar la pagina ni volver a loguearse
+            setAuth(data);
+
+            return {
+                msg: 'Actualizado Correctamente',
+                error: false
+            }
+
+        } catch (error) {
+            console.log('error')
+            return{
+                msg: error.response.data.msg,
+                error: true
+            };
+        }
+    }
 
 
-    // Guardar Passwoard Perfil
+    // guardar password nuevo desde perfil
+    const guardarPassword = async (datos) => {
+
+        // obtener token de local storage
+        const token = localStorage.getItem('token');
+        
+        // si no hay token para la ejecucion de este modulo y no inicia sesion
+        if (!token) {
+            setCargando(false);
+            return;
+        }
+
+        // Creamos el encabezado donde va las autenticaciones de la peticion
+        const config = {
+            headers: {
+                "Content-Type": "application/json", 
+                Authorization: `Bearer ${token}`
+            }
+        }
+
+        try {
+            const url = 'usuarios/cambiar-password';
+            await clienteAxios.put(url, datos, config);
+            return {
+                msg: 'Passwoard actualizado correctamente'
+            };
+        } catch (error) {
+            return {
+                msg: error.response.data.msg,
+                error: true
+            };
+        }
+    }
 
 
-    // Activar usuario
 
     return(
         <AuthContext.Provider 
@@ -71,7 +141,9 @@ const AuthProvider = ({children}) => {
                 auth,
                 setAuth,
                 cargando,
-                cerrarSesion
+                cerrarSesion,
+                actualizarPerfil,
+                guardarPassword
             }}
         >
             {children}
