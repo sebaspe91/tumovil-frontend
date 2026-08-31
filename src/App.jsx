@@ -19,6 +19,7 @@ import EditarPerfil from './pages/users/EditarPerfil';
 import CambiarPassword from './pages/users/CambiarPassword';
 
 import AdminCliente from './pages/clientes/AdminCliente';
+import AdminClientesEliminados from './pages/clientes/AdminClientesEliminados.';
 
 import FacturaVenta from './pages/facturaVenta/FacturaVenta';
 
@@ -55,16 +56,19 @@ function App() {
 
               {/* usuarios */}
               <Route path='admin-users/perfil' element={
-                <UsersProvider> <EditarPerfil /> </UsersProvider>
+                <UsersProvider key="usuarios-perfil"> <EditarPerfil /> </UsersProvider>
               }/>
 
               <Route path='admin-users/cambiar-password' element={
-                <UsersProvider> <CambiarPassword /> </UsersProvider>
+                <UsersProvider key="usuarios-cambiar-password"> <CambiarPassword /> </UsersProvider>
               }/>
 
               {/* Clientes */}
               <Route path='clientes' element={
-                <ClientesProvider> <AdminCliente /> </ClientesProvider>
+                <ClientesProvider key="clientes-activos"> <AdminCliente /> </ClientesProvider>
+              }/>
+              <Route path='clientes/eliminados' element={
+                <ClientesProvider key="clientes-eliminados"> <AdminClientesEliminados /> </ClientesProvider>
               }/>
 
 
@@ -73,11 +77,11 @@ function App() {
               <Route element={<RutaAdmin />}>
 
                 <Route path='admin-users' element={
-                  <UsersProvider> <AdminUsers /> </UsersProvider>
+                  <UsersProvider key="usuarios-activos"> <AdminUsers /> </UsersProvider>
                 }/>
 
                 <Route path='admin-users/eliminados' element={
-                  <UsersProvider> <AdminUsersEliminados /> </UsersProvider>
+                  <UsersProvider key="usuarios-eliminados"> <AdminUsersEliminados /> </UsersProvider>
                 }/>
 
               </Route>

@@ -45,7 +45,7 @@ const menuItems = [
         roles: ['ADMIN', 'VENDEDOR'], // SOLO admin
         submenu: [
             { label: 'Lista de clientes', to: '/clientes', roles: ['ADMIN', 'VENDEDOR'] },
-            { label: 'Crear clientes', to: '/clientes/crear', roles: ['ADMIN', 'VENDEDOR'] },
+            { label: 'Clientes Eliminados', to: '/clientes/eliminados', roles: ['ADMIN', 'VENDEDOR'] },
         ]
     },
     {

@@ -89,7 +89,6 @@ function Cliente({cliente}) {
                     className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors font-bold"
                 >
                     <FaCheckCircle />
-                    <span>Activar</span>
                 </button>
             </div>
         )}

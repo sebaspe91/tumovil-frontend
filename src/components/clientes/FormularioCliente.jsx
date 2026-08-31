@@ -27,7 +27,7 @@ function FormularioCliente() {
     const handleSubmit = async e => {
         e.preventDefault();
 
-        const {nombre_cliente, apellido_cliente, cedula_cliente, correo_cliente, telefono_cliente} = clienteRegistrar;
+        const {nombre_cliente, apellido_cliente, cedula_cliente, correo_cliente} = clienteRegistrar;
 
         setTimeout(() => {
             setAlerta({});

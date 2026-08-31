@@ -254,7 +254,7 @@ const ClientesProvider =({children}) => {
 
             if (!config) return;
 
-            const url = `/usuarios/activar/${id}`;
+            const url = `/clientes/${id}`;
             const {data} = await clienteAxios.patch(url, {}, config);
 
             // igual sobre la lista de eliminados
