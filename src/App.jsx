@@ -22,6 +22,7 @@ import AdminCliente from './pages/clientes/AdminCliente';
 import AdminClientesEliminados from './pages/clientes/AdminClientesEliminados.';
 
 import AdminProveedor from './pages/proveedor/AdminProveedor';
+import AdminProveedorEliminados from './pages/proveedor/AdminProveedorEliminados';
 
 import FacturaVenta from './pages/facturaVenta/FacturaVenta';
 
@@ -77,6 +78,9 @@ function App() {
               {/* Proveedor */}
               <Route path='proveedor' element={
                 <ProveedorProvider key="proveedor-activos"> <AdminProveedor /> </ProveedorProvider>
+              } />
+              <Route path='proveedor/eliminados' element={
+                <ProveedorProvider key="proveedor-eliminados"> <AdminProveedorEliminados /> </ProveedorProvider>
               } />
 
 
