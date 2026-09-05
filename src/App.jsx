@@ -21,12 +21,15 @@ import CambiarPassword from './pages/users/CambiarPassword';
 import AdminCliente from './pages/clientes/AdminCliente';
 import AdminClientesEliminados from './pages/clientes/AdminClientesEliminados.';
 
+import AdminProveedor from './pages/proveedor/AdminProveedor';
+
 import FacturaVenta from './pages/facturaVenta/FacturaVenta';
 
 import { AuthProvider } from './context/AuthProvider';
 import { UsersProvider } from './context/UsersProvider';
 import { FacturaVentaProvider } from './context/FacturaVentaProvider';
 import { ClientesProvider } from './context/ClientesProvider';
+import { ProveedorProvider } from './context/ProveedorProvider';
 
 
 function App() {
@@ -70,6 +73,11 @@ function App() {
               <Route path='clientes/eliminados' element={
                 <ClientesProvider key="clientes-eliminados"> <AdminClientesEliminados /> </ClientesProvider>
               }/>
+
+              {/* Proveedor */}
+              <Route path='proveedor' element={
+                <ProveedorProvider key="proveedor-activos"> <AdminProveedor /> </ProveedorProvider>
+              } />
 
 
 

@@ -9,7 +9,7 @@ function FormularioCliente() {
     // sacamos los elementos de cliente
     const {guardarCliente, cliente, alerta, setAlerta, cerrarModalFormularioCliente} = useClientes();
 
-    // dar a entender si es guardar .id o crear
+    // dar a entender si es editar .id o crear
     const [clienteRegistrar, setClienteRegistrar] = useState(() => ({
         id_cliente: cliente?.id_cliente, // valida si es actualizar o crear
         nombre_cliente: cliente?.nombre_cliente ?? '',
@@ -160,7 +160,7 @@ function FormularioCliente() {
                 <label htmlFor="telefono_cliente">Telefono del Cliente</label>
 
                 <input
-                    type="text"
+                    type="tel"
                     id="telefono_cliente"
                     placeholder="Telefono del cliente"
                     className='border-2 w-full p-2 mt-2 placeholder-gray-400 bg-gray-50 rounded-xl'

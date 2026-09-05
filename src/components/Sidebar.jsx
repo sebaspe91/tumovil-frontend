@@ -49,6 +49,16 @@ const menuItems = [
         ]
     },
     {
+        id: 'proveedor',
+        label: 'Proveedor',
+        icon: FaTruck, // distinto al de Clientes (antes tenia FaUserFriends, igual que Clientes)
+        roles: ['ADMIN', 'VENDEDOR'], // SOLO admin
+        submenu: [
+            { label: 'Lista de Proveedores', to: '/proveedor', roles: ['ADMIN', 'VENDEDOR'] },
+            { label: 'Proveedores Eliminados', to: '/proveedor/eliminados', roles: ['ADMIN'] },
+        ]
+    },
+    {
         id: 'productos',
         label: 'Productos',
         icon: FaBoxOpen,
