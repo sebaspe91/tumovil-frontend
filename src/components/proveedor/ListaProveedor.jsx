@@ -63,7 +63,7 @@ function ListaProveedor() {
             // quede todo alineado). Se oculta en movil -- con 8 columnas
             // angostas no cabe bien en una pantalla chica, ahi Cliente.jsx
             // pasa a formato de tarjeta apilada y esta cabecera no aplica
-            <div className="hidden md:grid md:grid-cols-[60px_70px_1.2fr_1.2fr_1fr_1.4fr_1fr_110px] gap-4 items-center
+            <div className="hidden md:grid md:grid-cols-[60px_70px_1.2fr_0.7fr_1.8fr_0.8fr_1fr_110px] gap-4 items-center text-center
                              bg-primary-700 text-white text-xs font-bold uppercase px-5 py-3 rounded-t-xl mx-5">
                 <span></span>
                 <span>ID</span>

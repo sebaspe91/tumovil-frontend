@@ -1,4 +1,5 @@
 import { FaEdit, FaTrashAlt, FaCheckCircle, FaUserCircle } from 'react-icons/fa';
+import CampoCopiable from '../CampoCopiable';
 import useProveedor from '../../hook/useProveedor';
 
 function Proveedor({proveedor}) {
@@ -8,7 +9,7 @@ function Proveedor({proveedor}) {
     const {id_proveedor, nombre_prov, nit_prov, correo_prov, telefono_prov, cuenta_prov, estado_prov} = proveedor;
 
   return (
-    <div className="flex flex-col md:grid md:grid-cols-[60px_70px_1.2fr_1.2fr_1fr_1.4fr_1fr_110px] gap-3 md:gap-4 md:items-center
+    <div className="flex flex-col md:grid md:grid-cols-[60px_70px_1.2fr_0.7fr_1.8fr_0.8fr_1fr_110px] gap-3 md:gap-4 md:items-center md:text-center
                      mx-5 my-4 md:my-0 bg-white shadow-md md:shadow-none p-5 md:p-0 rounded-xl md:rounded-none
                      md:border-b md:border-gray-100 md:px-5 md:py-3 md:hover:bg-gray-50 md:transition-colors text-primary-700">
 
@@ -18,39 +19,40 @@ function Proveedor({proveedor}) {
         </div>
 
         {/* ID: tambien solo en la vista de tabla */}
-        <div className="hidden md:block text-sm text-gray-400 font-mono">
+        <div className="hidden md:block md:min-w-0 text-sm text-gray-400 font-mono">
             #{id_proveedor}
         </div>
 
-        {/* Nombre */}
-        <p>
+        {/* Nombre: CampoCopiable con negrilla (claseTexto) para que se
+            vea igual que antes, pero ahora tambien se puede copiar */}
+        <p className="md:min-w-0">
             <span className="font-bold uppercase text-xs text-gray-500 md:hidden">Nombre: </span>
-            <span className="md:font-semibold">{nombre_prov}</span>
+            <CampoCopiable texto={nombre_prov} claseTexto="md:font-semibold" />
         </p>
 
         {/* Nit */}
-        <p>
+        <p className="md:min-w-0">
             <span className="font-bold uppercase text-xs text-gray-500 md:hidden">Nit: </span>
-            <span>{nit_prov}</span>
+            <CampoCopiable texto={nit_prov} />
         </p>
 
-        {/* Correo: "truncate" en la vista de tabla para que un correo
-            largo no rompa el ancho de la columna -- se corta con "..." */}
-        <p className="md:truncate">
+        {/* Correo: CampoCopiable -- corta el texto largo, muestra el valor
+            completo al pasar el mouse y deja copiarlo con el iconito */}
+        <p className="md:min-w-0">
             <span className="font-bold uppercase text-xs text-gray-500 md:hidden">Correo: </span>
-            <span>{correo_prov || 'N/A'}</span>
+            <CampoCopiable texto={correo_prov} />
         </p>
 
         {/* Telefono */}
-        <p>
+        <p className="md:min-w-0">
             <span className="font-bold uppercase text-xs text-gray-500 md:hidden">Telefono: </span>
-            <span>{telefono_prov || 'N/A'}</span>
+            <CampoCopiable texto={telefono_prov} />
         </p>
 
-        {/* Cuenta */}
-        <p className="md:truncate">
+        {/* Cuenta: mismo CampoCopiable */}
+        <p className="md:min-w-0">
             <span className="font-bold uppercase text-xs text-gray-500 md:hidden">Cuenta: </span>
-            <span>{cuenta_prov || 'N/A'}</span>
+            <CampoCopiable texto={cuenta_prov} />
         </p>
 
         {/* Acciones: mismo patron que en Usuario.jsx -- Editar/Eliminar

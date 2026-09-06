@@ -1,4 +1,5 @@
 import { FaEdit, FaTrashAlt, FaCheckCircle } from 'react-icons/fa';
+import CampoCopiable from '../CampoCopiable';
 import useUsers from "../../hook/useUsers";
 
 
@@ -16,31 +17,31 @@ function Usuario({usuario}) {
             Desde md, en fila y con el valor al lado del titulo. */}
         <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:gap-x-8 md:gap-y-2">
 
-            <p>
+            <p className="min-w-0">
                 <span className="font-bold uppercase">Nombre:</span>{' '}
-                <span className="block md:inline font-normal normal-case text-black">
-                    {nombre_user} {apellido_user}
+                <span className="inline-block md:inline align-bottom max-w-[200px] md:max-w-[220px]">
+                    <CampoCopiable texto={`${nombre_user} ${apellido_user}`} claseTexto="font-normal normal-case text-black" />
                 </span>
             </p>
 
-            <p>
+            <p className="min-w-0">
                 <span className="font-bold uppercase">Cedula:</span>{' '}
-                <span className="block md:inline font-normal normal-case text-black">
-                    {cedula_user}
+                <span className="inline-block md:inline align-bottom max-w-[150px]">
+                    <CampoCopiable texto={cedula_user} claseTexto="font-normal normal-case text-black" />
                 </span>
             </p>
 
-            <p>
+            <p className="min-w-0">
                 <span className="font-bold uppercase">Email:</span>{' '}
-                <span className="block md:inline font-normal normal-case text-black">
-                    {correo_user}
+                <span className="inline-block md:inline align-bottom max-w-[220px]">
+                    <CampoCopiable texto={correo_user} claseTexto="font-normal normal-case text-black" />
                 </span>
             </p>
 
-            <p>
+            <p className="min-w-0">
                 <span className="font-bold uppercase">Tel:</span>{' '}
-                <span className="block md:inline font-normal normal-case text-black">
-                    {telefono_user ? telefono_user : 'N/A'}
+                <span className="inline-block md:inline align-bottom max-w-[150px]">
+                    <CampoCopiable texto={telefono_user} claseTexto="font-normal normal-case text-black" />
                 </span>
             </p>
 

@@ -1,4 +1,5 @@
 import { FaEdit, FaTrashAlt, FaCheckCircle, FaUserCircle } from 'react-icons/fa';
+import CampoCopiable from '../CampoCopiable';
 import useClientes from '../../hook/useClientes';
 
 function Cliente({cliente}) {
@@ -13,7 +14,7 @@ function Cliente({cliente}) {
     // abajo no cambian entre las dos vistas, solo cambia como el
     // contenedor los acomoda. Las columnas coinciden EXACTO con las de
     // la cabecera en ListaClientes.jsx para que todo quede alineado.
-    <div className="flex flex-col md:grid md:grid-cols-[60px_70px_1.2fr_1.2fr_1fr_1.4fr_1fr_110px] gap-3 md:gap-4 md:items-center
+    <div className="flex flex-col md:grid md:grid-cols-[60px_70px_1.1fr_1.1fr_0.7fr_1.8fr_0.8fr_110px] gap-3 md:gap-4 md:items-center
                      mx-5 my-4 md:my-0 bg-white shadow-md md:shadow-none p-5 md:p-0 rounded-xl md:rounded-none
                      md:border-b md:border-gray-100 md:px-5 md:py-3 md:hover:bg-gray-50 md:transition-colors text-primary-700">
 
@@ -23,39 +24,41 @@ function Cliente({cliente}) {
         </div>
 
         {/* ID: tambien solo en la vista de tabla */}
-        <div className="hidden md:block text-sm text-gray-400 font-mono">
+        <div className="hidden md:block md:min-w-0 text-sm text-gray-400 font-mono">
             #{id_cliente}
         </div>
 
-        {/* Nombre */}
-        <p>
+        {/* Nombre: CampoCopiable con negrilla (claseTexto) para que se
+            vea igual que antes, pero ahora tambien se puede copiar */}
+        <p className="md:min-w-0">
             <span className="font-bold uppercase text-xs text-gray-500 md:hidden">Nombre: </span>
-            <span className="md:font-semibold">{nombre_cliente}</span>
+            <CampoCopiable texto={nombre_cliente} claseTexto="md:font-semibold" />
         </p>
 
         {/* Apellidos */}
-        <p>
+        <p className="md:min-w-0">
             <span className="font-bold uppercase text-xs text-gray-500 md:hidden">Apellidos: </span>
-            <span>{apellido_cliente}</span>
+            <CampoCopiable texto={apellido_cliente} />
         </p>
 
         {/* Cedula */}
-        <p>
+        <p className="md:min-w-0">
             <span className="font-bold uppercase text-xs text-gray-500 md:hidden">Cédula: </span>
-            <span>{cedula_cliente || 'N/A'}</span>
+            <CampoCopiable texto={cedula_cliente} />
         </p>
 
-        {/* Correo: "truncate" en la vista de tabla para que un correo
-            largo no rompa el ancho de la columna -- se corta con "..." */}
-        <p className="md:truncate">
+        {/* Correo: ahora usa CampoCopiable -- corta el texto largo con "...",
+            muestra el valor completo al pasar el mouse (title) y deja
+            copiarlo al portapapeles con el iconito */}
+        <p className="md:min-w-0">
             <span className="font-bold uppercase text-xs text-gray-500 md:hidden">Correo: </span>
-            <span>{correo_cliente || 'N/A'}</span>
+            <CampoCopiable texto={correo_cliente} />
         </p>
 
         {/* Telefono */}
-        <p>
+        <p className="md:min-w-0">
             <span className="font-bold uppercase text-xs text-gray-500 md:hidden">Teléfono: </span>
-            <span>{telefono_cliente || 'N/A'}</span>
+            <CampoCopiable texto={telefono_cliente} />
         </p>
 
         {/* Acciones: mismo patron que en Usuario.jsx -- Editar/Eliminar
