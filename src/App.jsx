@@ -24,6 +24,8 @@ import AdminClientesEliminados from './pages/clientes/AdminClientesEliminados.';
 import AdminProveedor from './pages/proveedor/AdminProveedor';
 import AdminProveedorEliminados from './pages/proveedor/AdminProveedorEliminados';
 
+import AdminEmpresa from './pages/empresa/AdminEmpresa';
+
 import FacturaVenta from './pages/facturaVenta/FacturaVenta';
 
 import { AuthProvider } from './context/AuthProvider';
@@ -31,6 +33,7 @@ import { UsersProvider } from './context/UsersProvider';
 import { FacturaVentaProvider } from './context/FacturaVentaProvider';
 import { ClientesProvider } from './context/ClientesProvider';
 import { ProveedorProvider } from './context/ProveedorProvider';
+import { EmpresaProvider } from './context/EmpresaProvider';
 
 
 function App() {
@@ -95,6 +98,11 @@ function App() {
                 <Route path='admin-users/eliminados' element={
                   <UsersProvider key="usuarios-eliminados"> <AdminUsersEliminados /> </UsersProvider>
                 }/>
+
+                {/* Empresa */}
+                <Route path='admin-empresa' element={
+                  <EmpresaProvider key='empresa-unica' ><AdminEmpresa /></EmpresaProvider>
+                } />
 
               </Route>
 
