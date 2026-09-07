@@ -14,20 +14,45 @@ function AdminEmpresa() {
     const [datos, setDatos] = useState({});
     const [alerta, setAlerta] = useState({});
 
+    // logoFile: el archivo que se eligio en el <input type="file">
+    // (todavia no se ha subido, solo esta seleccionado).
+    // logoPreview: una URL temporal que genera el navegador para poder
+    // mostrar ESE archivo en la pantalla antes de guardar (asi el
+    // usuario ve una vista previa de lo que va a subir).
+    const [logoFile, setLogoFile] = useState(null);
+    const [logoPreview, setLogoPreview] = useState(null);
+
     // Aca es donde antes estaba el useEffect. Copiar "empresa" a "datos"
     // ahora pasa dentro de un evento (el click de "Editar"), no de forma
     // automatica cada vez que "empresa" cambia -- por eso ya no aparece
     // la advertencia de React sobre llamar setState dentro de un efecto.
     const iniciarEdicion = () => {
         setDatos(empresa);
+        setLogoFile(null);
+        setLogoPreview(null);
         setEditando(true);
         setAlerta({});
+    }
+
+    // se llama cuando eliges un archivo en el input de tipo "file"
+    const handleLogoChange = e => {
+        const archivo = e.target.files[0];
+        if (!archivo) return;
+
+        setLogoFile(archivo);
+        // URL.createObjectURL crea un link temporal (solo funciona en
+        // este navegador, en esta pestaña) que apunta al archivo que
+        // esta en tu computador -- por eso podemos mostrarlo en el
+        // <img> de una vez, sin haberlo subido todavia al backend.
+        setLogoPreview(URL.createObjectURL(archivo));
     }
 
     // Cancelar: vuelve a modo solo-lectura y descarta cualquier cambio
     // que se haya escrito sin guardar.
     const cancelarEdicion = () => {
         setEditando(false);
+        setLogoFile(null);
+        setLogoPreview(null);
         setAlerta({});
     }
 
@@ -51,16 +76,43 @@ function AdminEmpresa() {
 
         setAlerta({});
 
-        const resultado = await actualizarEmpresa(datos);
+        // FormData es la unica forma de mandar un archivo junto con
+        // texto en la misma peticion. Si no elegiste un logo nuevo, se
+        // manda igual pero sin el campo "logo" -- el backend, al no
+        // recibir archivo, deja el logo que ya estaba.
+        const formData = new FormData();
+        formData.append('nombre_empresa', nombre_empresa);
+        formData.append('nit_empresa', nit_empresa);
+        formData.append('correo_empresa', correo_empresa);
+        formData.append('cel_empresa', cel_empresa);
+
+        if (logoFile) {
+            formData.append('logo', logoFile);
+        }
+
+        const resultado = await actualizarEmpresa(formData);
         setAlerta(resultado);
 
         // si se guardo bien, volvemos a modo solo-lectura
         if (!resultado?.error) {
             setEditando(false);
+            setLogoFile(null);
+            setLogoPreview(null);
         }
     }
 
     const {msg} = alerta;
+
+    // que logo se muestra en el recuadro:
+    // 1) si hay una vista previa de un archivo recien elegido, esa
+    // 2) si no, pero la empresa ya tiene un logo guardado, se arma la
+    //    URL completa apuntando al backend (ahi es donde vive el archivo)
+    // 3) si no hay ninguno de los dos, no se muestra nada (recuadro vacio)
+    const logoMostrar = logoPreview
+        ? logoPreview
+        : (empresa.logo_empresa
+            ? `${import.meta.env.VITE_BACKEND_URL}/uploads/empresa/${empresa.logo_empresa}`
+            : null);
 
     // clases del input segun si se puede editar o no
     const claseInput = editando
@@ -77,6 +129,37 @@ function AdminEmpresa() {
 
             <div className="mt-20 md:mt-5 shadow-lg px-5 py-10 rounded-xl bg-white md:mx-10">
                 <form onSubmit={handleSubmit}>
+
+                    {/* Logo */}
+                    <div className="my-5">
+                        <label className="uppercase text-gray-600 block txt-xl font-bold">
+                            Logo de la empresa
+                        </label>
+
+                        <div className="flex items-center gap-4 mt-3">
+                            <div className="w-24 h-24 border rounded-xl bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
+                                {logoMostrar ? (
+                                    <img
+                                        src={logoMostrar}
+                                        alt="Logo de la empresa"
+                                        className="w-full h-full object-contain"
+                                    />
+                                ) : (
+                                    <span className="text-xs text-gray-400 text-center px-2">Sin logo</span>
+                                )}
+                            </div>
+
+                            {/* el input de archivo solo aparece en modo edicion, igual que los demas campos */}
+                            {editando && (
+                                <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    onChange={handleLogoChange}
+                                    className="text-sm text-gray-600"
+                                />
+                            )}
+                        </div>
+                    </div>
 
                     {/* Nombre */}
                     <div className="my-5">

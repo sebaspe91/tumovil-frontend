@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import useAuth from "../hook/useAuth";
+import LogoEmpresa from "./LogoEmpresa";
 import { 
     FaUsers, 
     FaUserFriends,
@@ -145,7 +146,7 @@ function Sidebar() {
                 <div className="p-5">
                     {/* contenedor del titulo y boton X */}
                     <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-xl font-black">TuMovil</h2>
+                        <LogoEmpresa claseImagen="h-16 w-16" claseTexto="text-xl font-black" />
                         <button onClick={() => setSidebarAbierto(false)} className="lg:hidden text-white">
                             {/* icono X tamaño xl */}
                             <FaTimes className="text-xl" />

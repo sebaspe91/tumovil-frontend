@@ -1,5 +1,6 @@
 import useAuth from "../hook/useAuth";
 import { FaUserAlt, FaUserTie } from 'react-icons/fa';
+import LogoEmpresa from "./LogoEmpresa";
 
 function Header() {
 
@@ -17,7 +18,12 @@ function Header() {
 
         <div className="container mx-auto flex flex-col lg:flex-row justify-center items-center">
 
-            <h1 className="font-bold text-2xl text-primary-200 text-center lg:hidden">Tu<span className="text-white font-black">Movil</span></h1>
+            {/* Solo se ve en pantallas chicas (lg:hidden) -- en pantallas
+                grandes ya se ve la marca en el Sidebar, no hace falta
+                repetirla aca */}
+            <div className="lg:hidden">
+                <LogoEmpresa claseImagen="h-16 w-16 mx-auto" claseTexto="font-bold text-2xl text-primary-200" />
+            </div>
 
             <p className="flex items-center gap-2 font-bold text-center mt-2 lg:mt-0 text-primary-200 uppercase">
                 {tipo_user === 'ADMIN' ? <FaUserTie /> : <FaUserAlt />} <span className="font-black text-primary-100">{nombreUsuario}</span>

@@ -53,8 +53,13 @@ function App() {
               <Route path='confirmar/:id' element={<ConfirmarCuenta />} />
             </Route>
 
-            {/* privadas */}
-            <Route element={<RutaProtegida />}>
+            {/* privadas: EmpresaProvider envuelve TODA esta zona (no solo la
+                pagina de Empresa) porque el Sidebar y el Header -- que se ven
+                en todas las paginas privadas, los pinta RutaProtegida --
+                tambien necesitan el logo/nombre de la empresa. */}
+            <Route element={
+              <EmpresaProvider> <RutaProtegida /> </EmpresaProvider>
+            }>
 
               {/* (ADMIN y VENDEDOR) */}
               <Route path='factura-venta' element={
@@ -99,10 +104,11 @@ function App() {
                   <UsersProvider key="usuarios-eliminados"> <AdminUsersEliminados /> </UsersProvider>
                 }/>
 
-                {/* Empresa */}
-                <Route path='admin-empresa' element={
-                  <EmpresaProvider key='empresa-unica' ><AdminEmpresa /></EmpresaProvider>
-                } />
+                {/* Empresa: ya no necesita su propio EmpresaProvider aca --
+                    ahora lo envuelve toda la zona privada (ver arriba), asi
+                    que esta pagina usa el mismo contexto que ya cargaron
+                    el Sidebar y el Header */}
+                <Route path='admin-empresa' element={<AdminEmpresa />} />
 
               </Route>
 

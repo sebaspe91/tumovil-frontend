@@ -15,18 +15,25 @@ const EmpresaProvider = ({children}) => {
     // alerta para mostrar el resultado de guardar cambios
     const [alerta, setAlerta] = useState({});
 
-    // Funcion para crear el config con el token de autenticacion
-    const generarConfig = () => {
+    // Funcion para crear el config con el token de autenticacion.
+    // "multipart" en true es para cuando se manda un archivo (el logo):
+    // en ese caso NO se pone "Content-Type" a mano, porque el navegador
+    // tiene que agregarle el "boundary" (el separador entre cada campo
+    // del formulario) y eso no lo podemos escribir nosotros mismos.
+    const generarConfig = (multipart = false) => {
         const token = localStorage.getItem('token');
 
         if (!token) return; // termina operacion
 
-        return {
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            }
+        const headers = {
+            Authorization: `Bearer ${token}`
         }
+
+        if (!multipart) {
+            headers["Content-Type"] = "application/json";
+        }
+
+        return {headers}
     }
 
     // obtener la empresa (no recibe id, el backend ya sabe cual traer)
@@ -51,9 +58,12 @@ const EmpresaProvider = ({children}) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [auth]);
 
-    // actualizar los datos de la empresa (tampoco recibe id)
+    // actualizar los datos de la empresa (tampoco recibe id).
+    // "datos" puede ser un objeto normal (solo texto) o un FormData
+    // (cuando ademas se esta subiendo un logo nuevo) -- se detecta solo.
     const actualizarEmpresa = async datos => {
-        const config = generarConfig();
+        const esFormData = datos instanceof FormData;
+        const config = generarConfig(esFormData);
         if (!config) return;
 
         try {
