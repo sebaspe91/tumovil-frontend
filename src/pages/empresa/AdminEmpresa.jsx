@@ -11,7 +11,7 @@ function AdminEmpresa() {
     // contexto). Solo al hacer click en "Editar Datos" se copian esos
     // valores a "datos" y se habilitan los inputs.
     const [editando, setEditando] = useState(false);
-    const [datos, setDatos] = useState({});
+    const [datos, setDatos] = useState({}); // la copia local editable de la empresa — es donde van cayendo los cambios mientras escribes, antes de guardar.
     const [alerta, setAlerta] = useState({});
 
     // logoFile: el archivo que se eligio en el <input type="file">
@@ -19,40 +19,48 @@ function AdminEmpresa() {
     // logoPreview: una URL temporal que genera el navegador para poder
     // mostrar ESE archivo en la pantalla antes de guardar (asi el
     // usuario ve una vista previa de lo que va a subir).
-    const [logoFile, setLogoFile] = useState(null);
-    const [logoPreview, setLogoPreview] = useState(null);
+    const [logoFile, setLogoFile] = useState(null); // el archivo de imagen elegido en el <input type="file"> (todavía sin subir).
+    const [logoPreview, setLogoPreview] = useState(null); // el link temporal para poder mostrar ese archivo en pantalla antes de guardarlo.
 
     // Aca es donde antes estaba el useEffect. Copiar "empresa" a "datos"
     // ahora pasa dentro de un evento (el click de "Editar"), no de forma
     // automatica cada vez que "empresa" cambia -- por eso ya no aparece
     // la advertencia de React sobre llamar setState dentro de un efecto.
+
+    // Esta funcion corre cuando das click en "Editar Datos"
     const iniciarEdicion = () => {
-        setDatos(empresa);
-        setLogoFile(null);
-        setLogoPreview(null);
-        setEditando(true);
+        setDatos(empresa); // copia los datos reales a la copía de trabajo
+
+        setLogoFile(null); // Se asegura de que no quede no quede ningun logo elegido de una edicion anterior
+
+        setLogoPreview(null); // por si cancelaste una vez y volviste a entrar), prende el interruptor de edición, y limpia cualquier alerta vieja que hubiera quedado en pantalla
+
+        setEditando(true); // modo edicion para los inputs
+
         setAlerta({});
     }
 
     // se llama cuando eliges un archivo en el input de tipo "file"
     const handleLogoChange = e => {
-        const archivo = e.target.files[0];
-        if (!archivo) return;
+        const archivo = e.target.files[0]; // guarda los archivos en una lista, aca solo es un solo archivo por eso se toma el [0]
+        if (!archivo) return; // si abrio el selector y dio cancelar
 
+        // Guarda el archivo real para mandarlo al backend despues
         setLogoFile(archivo);
+        
         // URL.createObjectURL crea un link temporal (solo funciona en
         // este navegador, en esta pestaña) que apunta al archivo que
         // esta en tu computador -- por eso podemos mostrarlo en el
         // <img> de una vez, sin haberlo subido todavia al backend.
-        setLogoPreview(URL.createObjectURL(archivo));
+        setLogoPreview(URL.createObjectURL(archivo)); // URL de la ruta de tu pc, si esta en descargas "../../../C/descargas/archivo.jpg"
     }
 
     // Cancelar: vuelve a modo solo-lectura y descarta cualquier cambio
     // que se haya escrito sin guardar.
     const cancelarEdicion = () => {
-        setEditando(false);
-        setLogoFile(null);
-        setLogoPreview(null);
+        setEditando(false); // quita el modo de edicion en los inputs
+        setLogoFile(null); // quita todo archivo montado
+        setLogoPreview(null); // quita toda URL
         setAlerta({});
     }
 
@@ -80,14 +88,15 @@ function AdminEmpresa() {
         // texto en la misma peticion. Si no elegiste un logo nuevo, se
         // manda igual pero sin el campo "logo" -- el backend, al no
         // recibir archivo, deja el logo que ya estaba.
-        const formData = new FormData();
+        const formData = new FormData(); // instancia para recibir archivos y texto
         formData.append('nombre_empresa', nombre_empresa);
         formData.append('nit_empresa', nit_empresa);
         formData.append('correo_empresa', correo_empresa);
         formData.append('cel_empresa', cel_empresa);
 
+        // si trae un archivo del state
         if (logoFile) {
-            formData.append('logo', logoFile);
+            formData.append('logo', logoFile); // se agrega con formato archivo
         }
 
         const resultado = await actualizarEmpresa(formData);

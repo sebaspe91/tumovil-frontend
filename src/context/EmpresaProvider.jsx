@@ -20,7 +20,7 @@ const EmpresaProvider = ({children}) => {
     // en ese caso NO se pone "Content-Type" a mano, porque el navegador
     // tiene que agregarle el "boundary" (el separador entre cada campo
     // del formulario) y eso no lo podemos escribir nosotros mismos.
-    const generarConfig = (multipart = false) => {
+    const generarConfig = (multipart = false) => { // parametro con valor por defecto a false, si no trae argumento ps vale false
         const token = localStorage.getItem('token');
 
         if (!token) return; // termina operacion
@@ -29,6 +29,7 @@ const EmpresaProvider = ({children}) => {
             Authorization: `Bearer ${token}`
         }
 
+        // Si es false coloca el valor que venia antes pero si no se deja el valor Content-Type sin definir, aproposito para despues agregar otro con archivos
         if (!multipart) {
             headers["Content-Type"] = "application/json";
         }
@@ -43,7 +44,7 @@ const EmpresaProvider = ({children}) => {
 
         try {
             const {data} = await clienteAxios('/empresa', config);
-            setEmpresa(data.empresa);
+            setEmpresa(data.empresa); // agrega los datos de la consulta en este state
         } catch (error) {
             console.log(error.response?.data?.msg || error.message);
         }
@@ -62,6 +63,10 @@ const EmpresaProvider = ({children}) => {
     // "datos" puede ser un objeto normal (solo texto) o un FormData
     // (cuando ademas se esta subiendo un logo nuevo) -- se detecta solo.
     const actualizarEmpresa = async datos => {
+
+        /* 
+        instanceof => es un operador de JavaScript que pregunta "¿este valor fue construido con este constructor específico?". Aquí pregunta: "¿lo que me mandaron es un objeto FormData (como el que armamos en AdminEmpresa.jsx cuando hay logo), o es un objeto normal {...} (solo texto)?". El resultado (true o false) queda en esFormData.
+        */
         const esFormData = datos instanceof FormData;
         const config = generarConfig(esFormData);
         if (!config) return;
