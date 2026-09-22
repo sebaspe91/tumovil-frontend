@@ -26,6 +26,8 @@ import AdminProveedorEliminados from './pages/proveedor/AdminProveedorEliminados
 
 import AdminEmpresa from './pages/empresa/AdminEmpresa';
 
+import AdminMarcas from './pages/marcas/AdminMarcas';
+
 import FacturaVenta from './pages/facturaVenta/FacturaVenta';
 
 import { AuthProvider } from './context/AuthProvider';
@@ -34,6 +36,7 @@ import { FacturaVentaProvider } from './context/FacturaVentaProvider';
 import { ClientesProvider } from './context/ClientesProvider';
 import { ProveedorProvider } from './context/ProveedorProvider';
 import { EmpresaProvider } from './context/EmpresaProvider';
+import { MarcaProvider } from './context/MarcaProvider';
 
 
 function App() {
@@ -109,6 +112,10 @@ function App() {
                     que esta pagina usa el mismo contexto que ya cargaron
                     el Sidebar y el Header */}
                 <Route path='admin-empresa' element={<AdminEmpresa />} />
+
+                <Route path='admin-marcas' element={
+                  <MarcaProvider key="marcas-activas" ><AdminMarcas /></MarcaProvider>
+                } />
 
               </Route>
 
