@@ -27,6 +27,7 @@ import AdminProveedorEliminados from './pages/proveedor/AdminProveedorEliminados
 import AdminEmpresa from './pages/empresa/AdminEmpresa';
 
 import AdminMarcas from './pages/marcas/AdminMarcas';
+import AdminMarcasEliminadas from './pages/marcas/AdminMarcasEliminadas';
 
 import FacturaVenta from './pages/facturaVenta/FacturaVenta';
 
@@ -115,6 +116,10 @@ function App() {
 
                 <Route path='admin-marcas' element={
                   <MarcaProvider key="marcas-activas" ><AdminMarcas /></MarcaProvider>
+                } />
+
+                <Route path='admin-marcas/eliminados' element={
+                  <MarcaProvider key="marcas-eliminadas"><AdminMarcasEliminadas /></MarcaProvider>
                 } />
 
               </Route>

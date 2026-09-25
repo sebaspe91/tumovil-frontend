@@ -1,5 +1,4 @@
 import { FaEdit, FaTrashAlt, FaCheckCircle, FaCertificate } from 'react-icons/fa';
-import CampoCopiable from '../CampoCopiable';
 import useMarca from '../../hook/useMarca';
 
 function Marca({marca}) {

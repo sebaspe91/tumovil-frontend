@@ -65,8 +65,8 @@ const menuItems = [
         icon: FaBoxOpen,
         roles: ['ADMIN', 'VENDEDOR'], // ambos, pero el submenú puede variar
         submenu: [
-            { label: 'Lista de productos', to: '/admin-productos', roles: ['ADMIN', 'VENDEDOR'] },
-            { label: 'Crear producto', to: '/admin-productos/crear', roles: ['ADMIN'] }, // solo admin crea
+            { label: 'Productos', to: '/admin-productos', roles: ['ADMIN', 'VENDEDOR'] },
+            { label: 'Productos eliminados', to: '/admin-productos/eliminados', roles: ['ADMIN'] }, // solo admin crea
             { label: 'Marcas', to: '/admin-marcas', icon: FaTags, roles: ['ADMIN'] },
         ]
     },

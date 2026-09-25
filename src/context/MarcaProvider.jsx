@@ -120,7 +120,7 @@ const MarcaProvider = ({children}) => {
   // Llamados para obtener las marcas Eliminados
   useEffect(() => {
     const cargar = async () => {
-      await obtenerMarcas(paginaMarcaEliminados, busquedaMarcaEliminados)
+      await obtenerMarcasEliminados(paginaMarcaEliminados, busquedaMarcaEliminados)
     }
 
     cargar();
@@ -233,6 +233,7 @@ const MarcaProvider = ({children}) => {
       const {data} = await clienteAxios.put(url, {}, config);
 
       await obtenerMarcas(paginaMarca, busquedaMarca);
+      await obtenerMarcasEliminados(paginaMarcaEliminados, busquedaMarcaEliminados);
 
       return {
         msg: data.msg
@@ -259,8 +260,10 @@ const MarcaProvider = ({children}) => {
       const url = `/marcas/${id}`;
       const {data} = await clienteAxios.patch(url, {}, config);
 
-      // lista de eliminados
+      // se actualizan las dos listas: la marca desaparece de "eliminados"
+      // y tiene que aparecer de nuevo en la lista de activas
       await obtenerMarcasEliminados(paginaMarcaEliminados, busquedaMarcaEliminados);
+      await obtenerMarcas(paginaMarca, busquedaMarca);
 
       return {
         msg: data.msg

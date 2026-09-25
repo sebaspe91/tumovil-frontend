@@ -10,7 +10,11 @@ import { useEffect } from "react";
 //   onClose  -> funcion que se llama para cerrarlo (click afuera, la X, o Escape)
 //   titulo   -> texto que va en el encabezado
 //   children -> lo que se muestra adentro (en AdminUsers.jsx sera <FormularioUsers />)
-function Modal({ abierto, onClose, titulo, children }) {
+//   ancho    -> clase de Tailwind para el ancho maximo de la tarjeta (opcional).
+//               Por defecto queda igual que siempre (max-w-lg, pensado para
+//               formularios angostos). Se puede pasar algo mas ancho, como
+//               "max-w-4xl", cuando adentro va una tabla con varias columnas.
+function Modal({ abierto, onClose, titulo, children, ancho = 'max-w-lg' }) {
 
     // cerrar con la tecla Escape mientras el modal este abierto
     useEffect(() => {
@@ -43,7 +47,7 @@ function Modal({ abierto, onClose, titulo, children }) {
         >
             {/* La tarjeta blanca del modal en si */}
             <div
-                className="bg-white rounded-xl shadow-lg w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                className={`bg-white rounded-xl shadow-lg w-full ${ancho} max-h-[90vh] overflow-y-auto`}
                 onClick={(e) => e.stopPropagation()} // evita que el click "suba" hasta el fondo y lo cierre sin querer
             >
                 <div className="flex items-center justify-between p-5 border-b">
