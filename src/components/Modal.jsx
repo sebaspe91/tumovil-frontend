@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // Modal generico y reutilizable: cualquier pantalla lo puede usar para
 // mostrar lo que sea (un formulario, una confirmacion, etc.) adentro de
@@ -14,7 +14,28 @@ import { useEffect } from "react";
 //               Por defecto queda igual que siempre (max-w-lg, pensado para
 //               formularios angostos). Se puede pasar algo mas ancho, como
 //               "max-w-4xl", cuando adentro va una tabla con varias columnas.
+// contador compartido entre TODAS las instancias de Modal (no es un estado de
+// React, es una simple variable del modulo). Cada vez que CUALQUIER modal se
+// abre, este numero sube uno; asi, el ultimo que se abrio siempre tiene el
+// z-index mas alto y queda encima, sin importar en que orden esten escritos
+// los <Modal> en el archivo que los usa.
+let contadorZIndex = 60;
+
 function Modal({ abierto, onClose, titulo, children, ancho = 'max-w-lg' }) {
+
+    // el z-index de ESTA instancia del modal. Arranca en el valor actual del
+    // contador, y solo se vuelve a calcular cuando el modal pasa de cerrado a
+    // abierto (ver el useEffect de abajo) -> asi no cambia en cada render.
+    const [zIndex, setZIndex] = useState(contadorZIndex);
+
+    // cada vez que este modal se abre, pide "el siguiente numero" del
+    // contador compartido, quedando por encima de cualquier otro modal que ya
+    // estuviera abierto en ese momento
+    useEffect(() => {
+        if (!abierto) return;
+        contadorZIndex += 1;
+        setZIndex(contadorZIndex);
+    }, [abierto]);
 
     // cerrar con la tecla Escape mientras el modal este abierto
     useEffect(() => {
@@ -39,10 +60,12 @@ function Modal({ abierto, onClose, titulo, children, ancho = 'max-w-lg' }) {
         // Fondo oscuro que cubre toda la pantalla.
         // fixed inset-0  -> lo saca del flujo normal y lo estira a los 4 bordes de la ventana
         // bg-black/50    -> negro al 50% de opacidad (el "/50" es la opacidad en Tailwind)
-        // z-[60]         -> por encima de todo lo demas (el Sidebar usa hasta z-50)
+        // el z-index ya no es fijo: cada modal pide un numero mas alto que
+        // cualquier otro modal ya abierto (ver contadorZIndex arriba del componente)
         // flex items-center justify-center -> centra la tarjeta blanca en medio de la pantalla
         <div
-            className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4"
+            style={{ zIndex }} // dinamico: ver contadorZIndex arriba
             onClick={onClose} // click en el fondo oscuro = cerrar
         >
             {/* La tarjeta blanca del modal en si */}

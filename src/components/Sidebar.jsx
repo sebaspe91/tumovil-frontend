@@ -65,8 +65,7 @@ const menuItems = [
         icon: FaBoxOpen,
         roles: ['ADMIN', 'VENDEDOR'], // ambos, pero el submenú puede variar
         submenu: [
-            { label: 'Productos', to: '/admin-productos', roles: ['ADMIN', 'VENDEDOR'] },
-            { label: 'Productos eliminados', to: '/admin-productos/eliminados', roles: ['ADMIN'] }, // solo admin crea
+            { label: 'Productos', to: '/productos', roles: ['ADMIN', 'VENDEDOR'] },
             { label: 'Marcas', to: '/admin-marcas', icon: FaTags, roles: ['ADMIN'] },
         ]
     },
@@ -120,7 +119,7 @@ function Sidebar() {
             {/* boton desplegable de menu */}
             <button
                 onClick={() => setSidebarAbierto(true)}
-                className="lg:hidden fixed top-4 left-4 z-30 bg-primary-600 text-white p-3 rounded-lg shadow-lg"
+                className="xl:hidden fixed top-4 left-4 z-30 bg-primary-600 text-white p-3 rounded-lg shadow-lg"
             >
                 <FaBars className="text-xl" />
             </button>
@@ -128,7 +127,7 @@ function Sidebar() {
             {/* coloca la pantalla mas oscura detras del menu */}
             {sidebarAbierto && (
                 <div 
-                    className="lg:hidden fixed inset-0 bg-black/50 z-40"
+                    className="xl:hidden fixed inset-0 bg-black/50 z-40"
                     onClick={() => setSidebarAbierto(false)}
                 />
             )}
@@ -138,7 +137,7 @@ function Sidebar() {
                 className={`
                     w-64 bg-primary-600 min-h-screen text-white
                     fixed top-0 left-0 z-50 transition-transform duration-300
-                    lg:translate-x-0 lg:static lg:z-auto
+                    xl:translate-x-0 xl:static xl:z-auto
                     ${sidebarAbierto ? 'translate-x-0' : '-translate-x-full'}
                 `}
             >
@@ -147,7 +146,7 @@ function Sidebar() {
                     {/* contenedor del titulo y boton X */}
                     <div className="flex items-center justify-between mb-8">
                         <LogoEmpresa claseImagen="h-16 w-16" claseTexto="text-xl font-black" />
-                        <button onClick={() => setSidebarAbierto(false)} className="lg:hidden text-white">
+                        <button onClick={() => setSidebarAbierto(false)} className="xl:hidden text-white">
                             {/* icono X tamaño xl */}
                             <FaTimes className="text-xl" />
                         </button>

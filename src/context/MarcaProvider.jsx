@@ -241,7 +241,7 @@ const MarcaProvider = ({children}) => {
 
     } catch (error) {
       return {
-        msg: error.response?.data?.msg || 'No se pudo eliminar al Cliente',
+        msg: error.response?.data?.msg || 'No se pudo eliminar la Marca',
         error: true
       };   
     }
@@ -272,7 +272,7 @@ const MarcaProvider = ({children}) => {
     } catch (error) {
       console.log(error);
       return {
-          msg: error.response?.data?.msg || 'No se pudo activar al Cliente',
+          msg: error.response?.data?.msg || 'No se pudo activar la marca',
           error: true
       };
     }

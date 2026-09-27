@@ -29,6 +29,8 @@ import AdminEmpresa from './pages/empresa/AdminEmpresa';
 import AdminMarcas from './pages/marcas/AdminMarcas';
 import AdminMarcasEliminadas from './pages/marcas/AdminMarcasEliminadas';
 
+import AdminProductos from './pages/productos/AdminProductos';
+
 import FacturaVenta from './pages/facturaVenta/FacturaVenta';
 
 import { AuthProvider } from './context/AuthProvider';
@@ -38,6 +40,7 @@ import { ClientesProvider } from './context/ClientesProvider';
 import { ProveedorProvider } from './context/ProveedorProvider';
 import { EmpresaProvider } from './context/EmpresaProvider';
 import { MarcaProvider } from './context/MarcaProvider';
+import { ProductosProvider } from './context/ProductosProvider';
 
 
 function App() {
@@ -93,6 +96,16 @@ function App() {
               } />
               <Route path='proveedor/eliminados' element={
                 <ProveedorProvider key="proveedor-eliminados"> <AdminProveedorEliminados /> </ProveedorProvider>
+              } />
+
+              {/* Productos: el formulario de producto necesita elegir una
+                  marca (modal selector), por eso esta ruta tambien queda
+                  envuelta en MarcaProvider -- si no, useMarca() adentro del
+                  formulario no tendria de donde leer datos */}
+              <Route path='productos' element={
+                <MarcaProvider key="marcas-para-productos">
+                  <ProductosProvider key="productos-activos"><AdminProductos /></ProductosProvider>
+                </MarcaProvider>
               } />
 
 
