@@ -14,7 +14,9 @@ import {
     FaTags, 
     FaTruck, 
     FaBars, 
-    FaTimes
+    FaTimes,
+    FaHistory,
+    FaFileInvoiceDollar
 } from 'react-icons/fa';
 
 // Configuración del menú: cada ítem sabe qué roles pueden verlo
@@ -75,8 +77,9 @@ const menuItems = [
         icon: FaFileInvoice,
         roles: ['ADMIN', 'VENDEDOR'],
         submenu: [
-            { label: 'Facturas clientes', to: '/facturas-cliente', roles: ['ADMIN', 'VENDEDOR'] },
-            { label: 'Facturas proveedor', to: '/facturas-proveedor', icon: FaTruck, roles: ['ADMIN'] }, // solo admin
+            { label: 'Facturas Ventas', to: '/factura-venta', icon: FaFileInvoiceDollar, roles: ['ADMIN', 'VENDEDOR'] },
+            { label: 'Facturas proveedor', to: '/factura-proveedor', icon: FaTruck, roles: ['ADMIN'] }, // solo admin
+            { label: 'Historial Facturas', to: '/facturas-historial', icon: FaHistory, roles: ['ADMIN'] }, // solo admin
         ]
     },
     {

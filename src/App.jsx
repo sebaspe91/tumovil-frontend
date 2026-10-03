@@ -31,7 +31,8 @@ import AdminMarcasEliminadas from './pages/marcas/AdminMarcasEliminadas';
 
 import AdminProductos from './pages/productos/AdminProductos';
 
-import FacturaVenta from './pages/facturaVenta/FacturaVenta';
+import AmdinFacturaVenta from './pages/facturaVenta/AmdinFacturaVenta';
+import HistorialFacturaVenta from './pages/facturaVenta/HistorialFacturaVenta';
 
 import { AuthProvider } from './context/AuthProvider';
 import { UsersProvider } from './context/UsersProvider';
@@ -70,7 +71,16 @@ function App() {
 
               {/* (ADMIN y VENDEDOR) */}
               <Route path='factura-venta' element={
-                <FacturaVentaProvider> <FacturaVenta /> </FacturaVentaProvider>
+                <ClientesProvider key="clientes-para-factura-venta">
+                  <ProductosProvider key="productos-para-factura-venta">
+                    <FacturaVentaProvider key="factura-crear"> <AmdinFacturaVenta /> </FacturaVentaProvider>
+                  </ProductosProvider>
+                </ClientesProvider>
+              }/>
+
+              {/* historial: facturas activas y eliminadas, sin crear nada aca */}
+              <Route path='facturas-historial' element={
+                <FacturaVentaProvider key="factura-historial"> <HistorialFacturaVenta /> </FacturaVentaProvider>
               }/>
 
               {/* usuarios */}

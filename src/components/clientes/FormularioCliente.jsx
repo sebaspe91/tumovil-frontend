@@ -4,7 +4,7 @@ import Alerta from '../Alerta';
 
 
 
-function FormularioCliente() {
+function FormularioCliente({ onExito }) {
 
     // sacamos los elementos de cliente
     const {guardarCliente, cliente, alerta, setAlerta, cerrarModalFormularioCliente} = useClientes();
@@ -53,6 +53,13 @@ function FormularioCliente() {
             // si el backend respondio con error, dejamos el formulario
             // abierto y con los datos tal cual, para que se puedan corregir
             if (resultado?.error) return;
+
+            // si alguien que usa este formulario quiere hacer algo mas con
+            // el cliente que se acaba de registrar (ej. FormularioFacturaVenta
+            // elegirlo automaticamente para la factura que se esta armando),
+            // se le avisa aca. Si nadie pasa "onExito", no pasa nada (es
+            // opcional) y el formulario se sigue comportando igual que siempre
+            if (onExito) onExito(resultado.cliente);
 
             setTimeout(() => {
                 cerrarModalFormularioCliente();

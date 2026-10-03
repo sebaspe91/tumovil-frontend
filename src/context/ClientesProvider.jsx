@@ -167,9 +167,13 @@ const ClientesProvider =({children}) => {
             }
         } else {
             try {
-                // registrar nuevo cliente
+                // registrar nuevo cliente -- aca SI se guarda la respuesta
+                // (antes se ignoraba con "await ... ;" sin desestructurar):
+                // "data.cliente" es el cliente recien creado con su
+                // id_cliente ya puesto, lo necesitamos para poder elegirlo
+                // de una vez cuando esto se usa desde Factura de Venta
                 const url = "/clientes";
-                await clienteAxios.post(url, clienteAGuardar, config);
+                const {data} = await clienteAxios.post(url, clienteAGuardar, config);
 
                 setBusquedaCliente('');
                 setPaginaCliente(1);
@@ -177,7 +181,8 @@ const ClientesProvider =({children}) => {
                 await obtenerClientes(1, '');
 
                 return {
-                    msg: 'El Cliente se registró correctamente'
+                    msg: 'El Cliente se registró correctamente',
+                    cliente: data.cliente
                 }
             } catch (error) {
                 const msg = error.response?.data?.msg || 'No se pudo registrar al Cliente';

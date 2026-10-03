@@ -26,6 +26,14 @@ import Paginacion from "./Paginacion";
 //   onCambiarPagina    -> funcion para cambiar de pagina (ej. cambiarPaginaMarca)
 //   obtenerKey         -> funcion que devuelve el key unico de cada item (ej. m => m.id_marca)
 //   renderFila         -> funcion que devuelve el JSX de adentro de cada fila
+//   accionExtra        -> (opcional) JSX extra que se muestra debajo del
+//                          buscador, ANTES de la lista. Pensado para cosas
+//                          como un boton de "+ crear nuevo" cuando lo que se
+//                          busca no existe todavia (ver SeleccionarClienteModal.jsx).
+//                          Si no se pasa nada, no se muestra nada: este
+//                          componente generico sigue sin saber que es un
+//                          "cliente" ni como se crea uno, solo deja un
+//                          espacio para que quien lo use ponga lo que necesite
 function SeleccionarModal({
     abierto,
     onClose,
@@ -39,7 +47,8 @@ function SeleccionarModal({
     paginacion,
     onCambiarPagina,
     obtenerKey,
-    renderFila
+    renderFila,
+    accionExtra
 }) {
 
     const [texto, setTexto] = useState(busqueda);
@@ -83,6 +92,12 @@ function SeleccionarModal({
                     )}
                 </div>
             </form>
+
+            {accionExtra && (
+                <div className="mb-4">
+                    {accionExtra}
+                </div>
+            )}
 
             {items.length ? (
                 <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
