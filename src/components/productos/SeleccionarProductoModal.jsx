@@ -30,7 +30,17 @@ const FILTROS_VACIOS = {
 // perderiamos de donde sacar los datos de lo que ya se habia marcado antes.
 // Guardando el objeto completo en el momento en que se marca, la seleccion
 // sobrevive aunque despues se busque otra cosa o se cambie de pagina.
-function SeleccionarProductoModal({ abierto, onClose, onElegir }) {
+//
+// Prop "modo":
+//   'venta'  (por defecto) -> no deja elegir mas que el stock y bloquea los agotados
+//   'compra'               -> SIN tope de stock (se esta comprando mercancia que
+//                             todavia no se tiene) y muestra el precio de COMPRA
+function SeleccionarProductoModal({ abierto, onClose, onElegir, modo = 'venta' }) {
+    const esCompra = modo === 'compra';
+
+    // cantidad maxima permitida de un producto: en compra no hay maximo
+    const topeCantidad = producto => esCompra ? Infinity : producto.cantidad_prod;
+
     const { productos, paginacionProducto, filtrosProducto, buscarProducto, cambiarPaginaProducto } = useProducto();
 
     const [texto, setTexto] = useState(filtrosProducto.nombre_prod);
@@ -103,7 +113,9 @@ function SeleccionarProductoModal({ abierto, onClose, onElegir }) {
             const item = anterior[idProducto];
             if (!item) return anterior;
 
-            const cantidad = Math.max(1, Math.min(Number(item.cantidad) || 1, item.producto.cantidad_prod));
+            // minimo 1. Ya NO se recorta al stock aqui: si se pasa, el campo queda en rojo
+            // con un mensaje (ver "excede" mas abajo) y el boton Agregar se bloquea
+            const cantidad = Math.max(1, Number(item.cantidad) || 1);
 
             return {
                 ...anterior,
@@ -117,11 +129,14 @@ function SeleccionarProductoModal({ abierto, onClose, onElegir }) {
     // todavia no se habria disparado)
     const itemsElegidos = Object.values(seleccion).map(item => ({
         producto: item.producto,
-        cantidad: Math.max(1, Math.min(Number(item.cantidad) || 1, item.producto.cantidad_prod))
+        cantidad: Math.max(1, Math.min(Number(item.cantidad) || 1, topeCantidad(item.producto)))
     }));
 
+    // alguna cantidad elegida supera el tope? (en compra nunca: no hay tope)
+    const hayExceso = Object.values(seleccion).some(item => Number(item.cantidad) > topeCantidad(item.producto));
+
     const handleAgregar = () => {
-        if (itemsElegidos.length === 0) return;
+        if (itemsElegidos.length === 0 || hayExceso) return;
 
         onElegir(itemsElegidos);
         setSeleccion({});
@@ -161,8 +176,11 @@ function SeleccionarProductoModal({ abierto, onClose, onElegir }) {
             {productos.length ? (
                 <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
                     {productos.map(producto => {
-                        const sinStock = producto.cantidad_prod <= 0;
+                        // en compra un producto agotado SI se puede elegir (justo es el que se quiere comprar)
+                        const sinStock = !esCompra && producto.cantidad_prod <= 0;
                         const elegido = seleccion[producto.id_producto];
+                        // la cantidad escrita supera el stock de este producto?
+                        const excede = Boolean(elegido) && Number(elegido.cantidad) > topeCantidad(producto);
 
                         return (
                             <div
@@ -180,8 +198,13 @@ function SeleccionarProductoModal({ abierto, onClose, onElegir }) {
                                     <span className="flex flex-col">
                                         <span className="font-bold text-primary-700">{producto.nombre_prod}</span>
                                         <span className="text-sm text-gray-500">
-                                            $ {Number(producto.precio_venta).toLocaleString('es-CO')} · Stock: {sinStock ? 'agotado' : producto.cantidad_prod}
+                                            $ {Number(esCompra ? producto.precio_compra : producto.precio_venta).toLocaleString('es-CO')} · {esCompra ? 'Stock actual' : 'Stock'}: {sinStock ? 'agotado' : producto.cantidad_prod}
                                         </span>
+                                        {excede && (
+                                            <span className="text-xs text-red-600 font-semibold">
+                                                Solo hay {producto.cantidad_prod} en stock. Baja la cantidad.
+                                            </span>
+                                        )}
                                     </span>
                                 </label>
 
@@ -189,11 +212,11 @@ function SeleccionarProductoModal({ abierto, onClose, onElegir }) {
                                     <input
                                         type="number"
                                         min="1"
-                                        max={producto.cantidad_prod}
+                                        max={esCompra ? undefined : producto.cantidad_prod}
                                         value={elegido.cantidad}
                                         onChange={e => cambiarCantidad(producto.id_producto, e.target.value)}
                                         onBlur={() => corregirCantidad(producto.id_producto)}
-                                        className="border-2 p-2 rounded-lg w-20 text-center shrink-0"
+                                        className={`border-2 p-2 rounded-lg w-20 text-center shrink-0 ${excede ? 'bg-red-100 border-red-500 text-red-700 font-bold' : ''}`}
                                     />
                                 )}
                             </div>
@@ -216,10 +239,12 @@ function SeleccionarProductoModal({ abierto, onClose, onElegir }) {
             <button
                 type="button"
                 onClick={handleAgregar}
-                disabled={itemsElegidos.length === 0}
+                disabled={itemsElegidos.length === 0 || hayExceso}
                 className="w-full bg-primary-600 text-white uppercase font-bold px-5 py-3 rounded-xl mt-4 hover:bg-primary-800 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
-                {itemsElegidos.length
+                {hayExceso
+                    ? 'Corrige las cantidades en rojo'
+                    : itemsElegidos.length
                     ? `Agregar ${itemsElegidos.length} producto${itemsElegidos.length > 1 ? 's' : ''}`
                     : 'Elige al menos un producto'}
             </button>

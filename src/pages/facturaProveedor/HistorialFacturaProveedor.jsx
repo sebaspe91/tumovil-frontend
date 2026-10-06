@@ -1,18 +1,18 @@
 import { useEffect } from "react";
-import useFacturaVenta from "../../hook/useFacturaVenta";
+import useFacturaProveedor from "../../hook/useFacturaProveedor";
 import useRefrescarAlVolver from "../../hook/useRefrescarAlVolver";
+import FacturaProveedorDetalle from "../../components/facturaProveedor/FacturaProveedorDetalle";
+import ListaFacturaProveedor from "../../components/facturaProveedor/ListaFacturaProveedor";
+import ListaFacturaProveedorEliminadas from "../../components/facturaProveedor/ListaFacturaProveedorEliminadas";
 import Alerta from "../../components/Alerta";
-import FacturaVentaDetalle from "../../components/facturaVenta/FacturaVentaDetalle";
-import ListaFacturaVenta from "../../components/facturaVenta/ListaFacturaVenta";
-import ListaFacturaVentaEliminadas from "../../components/facturaVenta/ListaFacturaVentaEliminadas";
 import Modal from "../../components/Modal";
 
-// pagina nueva ("/facturas-historial"): aca es donde viven las listas que
-// antes estaban mezcladas con la de crear factura -- facturas activas,
-// facturas eliminadas (en un modal) y el detalle de una factura (en otro
-// modal). No usa ClientesProvider ni ProductosProvider porque aca no se
-// elige nada, solo se consulta lo que ya existe.
-function HistorialFacturaVenta() {
+// Pagina "/facturas-compra": el HISTORIAL de compras. Aqui viven la lista de facturas
+// activas, la de eliminadas (en un modal) y el detalle de una factura (en otro modal).
+// No usa ProveedorProvider ni ProductosProvider: aqui no se elige nada, solo se consulta
+// lo que ya existe. Es la pareja de /factura-compra (la pagina para CREAR).
+function HistorialFacturaProveedor() {
+  // PASO 1 -- lo que necesitamos del Provider
   const {
     modalDetalle,
     cerrarModalDetalle,
@@ -24,11 +24,11 @@ function HistorialFacturaVenta() {
     alerta,
     setAlerta,
     refrescarFacturas
-  } = useFacturaVenta();
+  } = useFacturaProveedor();
 
-  // PASO 1 -- las alertas (ej. "No hay suficiente stock de X para reactivar") se
-  // borran solas a los 8 segundos. El "return" limpia el temporizador si la alerta
-  // cambia antes o si se sale de la pagina.
+  // PASO 2 -- las alertas (ej. "No se puede eliminar: parte de esa mercancia ya se
+  // vendio") se borran solas a los 8 segundos. El "return" limpia el temporizador si la
+  // alerta cambia antes o si se sale de la pagina.
   useEffect(() => {
     if (!alerta?.msg) return;
 
@@ -37,7 +37,7 @@ function HistorialFacturaVenta() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alerta]);
 
-  // PASO 2 -- si dejas esta pagina abierta, generas una factura en otra pestana y
+  // PASO 3 -- si dejas esta pagina abierta, generas una compra en otra pestana y
   // vuelves, la lista se vuelve a pedir sola (ver hook/useRefrescarAlVolver.jsx)
   useRefrescarAlVolver(refrescarFacturas);
 
@@ -54,12 +54,12 @@ function HistorialFacturaVenta() {
         </button>
       </div>
 
-      <h2 className="font-black text-3xl text-center">Historial de Facturas de Ventas</h2>
+      <h2 className="font-black text-3xl text-center">Historial de Facturas de Compras</h2>
 
       <p className="text-xl mt-5 mb-6 text-center">
         Todas las{' '}
         <span className="text-primary-600 font-bold">Facturas</span>
-        {' '}registradas
+        {' '}de compra registradas
       </p>
 
       {/* mensajes de eliminar / reactivar / descargar PDF */}
@@ -69,26 +69,26 @@ function HistorialFacturaVenta() {
       <Modal
         abierto={modalDetalle}
         onClose={cerrarModalDetalle}
-        titulo="Detalle de la Factura"
+        titulo="Detalle de la Factura de Compra"
         ancho="max-w-2xl"
       >
-        {modalDetalle && facturaSeleccionada && <FacturaVentaDetalle />}
+        {modalDetalle && facturaSeleccionada && <FacturaProveedorDetalle />}
       </Modal>
 
       {/* lista de facturas eliminadas */}
       <Modal
         abierto={modalEliminadas}
         onClose={() => setModalEliminadas(false)}
-        titulo="Facturas Eliminadas"
+        titulo="Facturas de Compra Eliminadas"
         ancho="max-w-4xl"
       >
         {/* solo se monta (y solo entonces se piden los datos) mientras el modal esta abierto */}
-        {modalEliminadas && <ListaFacturaVentaEliminadas />}
+        {modalEliminadas && <ListaFacturaProveedorEliminadas />}
       </Modal>
 
-      <ListaFacturaVenta />
+      <ListaFacturaProveedor />
     </>
   )
 }
 
-export default HistorialFacturaVenta;
+export default HistorialFacturaProveedor;

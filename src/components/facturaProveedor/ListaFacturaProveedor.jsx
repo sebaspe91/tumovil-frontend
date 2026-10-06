@@ -1,36 +1,35 @@
 import { useState } from "react";
 import { FaFilter } from "react-icons/fa";
-import useFacturaVenta from "../../hook/useFacturaVenta";
-import FacturaVenta from "./FacturaVenta";
-import FiltrosFactura from "./FiltrosFactura";
+import useFacturaProveedor from "../../hook/useFacturaProveedor";
+import FacturaProveedor from "./FacturaProveedor";
+import FiltrosFactura from "../facturaVenta/FiltrosFactura";
 import Paginacion from "../Paginacion";
 
-// Lista del HISTORIAL de facturas activas.
-// Ya no filtra ni corta nada en el navegador: todo viene resuelto desde el
-// backend (que filtra, ordena y entrega solo la pagina actual).
-function ListaFacturaVenta() {
+// Lista del HISTORIAL de facturas de compra ACTIVAS.
+// No filtra ni corta nada en el navegador: el backend ya entrega la pagina actual,
+// filtrada por proveedor y por fechas (ver consultarFacturasPaginadas en el backend).
+function ListaFacturaProveedor() {
     // PASO 1 -- datos y funciones que vienen del Provider
     const {
         facturas,              // las facturas de la pagina actual
         paginacionFactura,     // { total, totalPaginas, paginaActual, limite }
-        filtrosFactura,        // filtros aplicados (para el mensaje de "sin resultados")
+        filtrosFactura,        // filtros aplicados ahora mismo { busqueda, desde, hasta }
         buscarFactura,         // pide la pagina 1 con filtros nuevos
-        cambiarPaginaFactura   // pide otra pagina con los mismos filtros
-    } = useFacturaVenta();
+        cambiarPaginaFactura   // pide otra pagina manteniendo los filtros
+    } = useFacturaProveedor();
 
-    // PASO 2 -- hay algun filtro aplicado en la busqueda activa?
-    // Object.values(filtrosFactura) = ['juan', '', ''] ; .some(...) da true si
-    // AL MENOS UNO no esta vacio. Sirve para el puntito del boton, para decidir
-    // si el panel arranca abierto y para escoger el mensaje de "sin resultados".
+    // PASO 2 -- ¿hay algun filtro aplicado? Object.values(...) = ['juan', '', ''] y
+    // .some(...) da true si AL MENOS UNO no esta vacio. Sirve para tres cosas: el puntito
+    // del boton, abrir el panel si ya hay una busqueda, y el mensaje de "sin resultados".
     const hayFiltrosActivos = Object.values(filtrosFactura).some(valor => valor !== '');
 
-    // el panel de filtros se puede ocultar (ocupa mucho espacio); si el usuario
-    // entra con una busqueda ya aplicada, lo dejamos abierto para que la vea
+    // el panel de filtros se puede ocultar (ocupa mucho espacio); si el usuario entra
+    // con una busqueda ya aplicada, se deja abierto para que la vea
     const [mostrarFiltros, setMostrarFiltros] = useState(() => hayFiltrosActivos);
 
   return (
     <>
-        {/* boton para mostrar/ocultar el panel de filtros, para no ocupar tanto espacio siempre */}
+        {/* PASO 3 -- boton para mostrar/ocultar el panel de filtros */}
         <div className="max-w-3xl mx-auto mb-4 flex justify-center">
             <button
                 type="button"
@@ -47,48 +46,51 @@ function ListaFacturaVenta() {
             </button>
         </div>
 
-        {/* PASO 3 -- casillas de filtro: al pulsar Buscar llaman a buscarFactura.
-            OJO: NO se usa "{mostrarFiltros && <FiltrosFactura />}". Eso DESMONTA el
-            componente al ocultarlo y se pierde lo escrito en las casillas (su
-            estado vive dentro de el). Con la clase "hidden" (display: none) el
-            componente sigue montado, solo se esconde, y conserva su texto. */}
+        {/* PASO 4 -- casillas de filtro: al pulsar Buscar llaman a buscarFactura.
+            OJO: el panel se OCULTA con la clase "hidden" (display: none), NO con
+            "{mostrarFiltros && <FiltrosFactura />}". Eso ultimo DESMONTA el componente y
+            se pierde lo escrito en las casillas; con "hidden" sigue montado y conserva su texto. */}
         <div className={mostrarFiltros ? '' : 'hidden'}>
-            <FiltrosFactura onBuscar={buscarFactura} />
+            <FiltrosFactura
+                onBuscar={buscarFactura}
+                etiquetaBusqueda="Proveedor"
+                placeholderBusqueda="Buscar por nombre, nit o correo del proveedor"
+            />
         </div>
 
-        {/* PASO 4 -- encabezado de la tabla (solo en pantallas grandes y si hay filas) */}
+        {/* PASO 5 -- encabezado de la tabla (solo en pantallas grandes y si hay filas) */}
         {facturas.length > 0 && (
             <div className="hidden lg:grid lg:grid-cols-[100px_1.6fr_1.2fr_80px_1fr_150px] gap-4 items-center
                 bg-primary-700 text-white text-xs font-bold uppercase px-5 py-3 rounded-t-xl mx-5">
                 <span className="text-left">Fecha</span>
-                <span className="text-left">Cliente</span>
-                <span className="text-left">Vendedor</span>
+                <span className="text-left">Proveedor</span>
+                <span className="text-left">Registrado por</span>
                 <span className="text-left">Items</span>
                 <span className="text-left">Total</span>
                 <span className="text-right">Acciones</span>
             </div>
         )}
 
-        {/* PASO 5 -- las filas, o un mensaje si no hay nada */}
+        {/* PASO 6 -- las filas, o un mensaje si no hay nada */}
         {facturas.length ? (
             <div className="lg:border lg:border-t-0 lg:border-gray-200 lg:rounded-b-xl lg:overflow-hidden">
                 {facturas.map(factura => (
-                    <FacturaVenta key={factura.id_fact_cli} factura={factura} />
+                    <FacturaProveedor key={factura.id_fact_prov} factura={factura} />
                 ))}
             </div>
         ):(
             <p className="text-xl mt-5 mb-10 text-center">
                 {hayFiltrosActivos
                     ? <>No se encontraron facturas con los filtros aplicados</>
-                    : <>No hay facturas registradas</>
+                    : <>No hay facturas de compra registradas</>
                 }
             </p>
         )}
 
-        {/* PASO 6 -- botones Anterior / Siguiente (se ocultan solos si hay 1 sola pagina) */}
+        {/* PASO 7 -- botones Anterior / Siguiente (se ocultan solos si hay 1 sola pagina) */}
         <Paginacion paginacion={paginacionFactura} onCambiarPagina={cambiarPaginaFactura} />
     </>
   )
 }
 
-export default ListaFacturaVenta;
+export default ListaFacturaProveedor;

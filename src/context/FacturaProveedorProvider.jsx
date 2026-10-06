@@ -2,60 +2,47 @@ import { createContext, useState, useEffect } from "react";
 import useAuth from "../hook/useAuth";
 import clienteAxios from "../config/axios";
 
-const FacturaVentaContext = createContext();
+const FacturaProveedorContext = createContext();
 
-// =====================================================================
-//  PASO A -- Constantes y funciones "puras" (viven FUERA del componente)
-// =====================================================================
-// Estan fuera del Provider porque no usan useState ni nada de React: solo
-// reciben datos y devuelven datos. Asi no se vuelven a crear en cada render.
+// filtros
+const FILTROS_VACIOS = {busqueda: '', desde: '', hasta: ''};
 
-// Los 3 filtros del historial, todos vacios. Se usa para "empezar de cero"
-// y para el boton Limpiar.
-//   busqueda -> texto para buscar por cliente (nombre, apellido o cedula)
-//   desde    -> fecha inicial de la FACTURA  (formato 'YYYY-MM-DD' del <input type="date">)
-//   hasta    -> fecha final de la FACTURA    (mismo formato)
-const FILTROS_VACIOS = { busqueda: '', desde: '', hasta: '' };
-
-// El backend responde con esta forma; la usamos de valor inicial para que
-// <Paginacion /> no reviente antes de que llegue la primera respuesta.
+// paginacion incial
 const PAGINACION_VACIA = { total: 0, totalPaginas: 0, paginaActual: 1, limite: 5 };
 
-// armarParametros: convierte (filtros + numero de pagina) en el texto que
-// va despues del "?" de la URL. Ejemplo de resultado:
-//     pagina=2&busqueda=juan&desde=2026-10-01T05%3A00%3A00.000Z
-// URLSearchParams se encarga de codificar espacios y simbolos raros.
-const armarParametros = (filtros, pagina) => {
-    const params = new URLSearchParams();
-    params.set('pagina', pagina);
 
-    // solo se manda cada filtro si el usuario lo lleno
+// armar parametros: convierte filtros + nuemro de pagina en el texto que va despues del ? de la url
+const armarParametros = (filtros, pagina) => {
+    // instanciamos para agregar parametros a la URL
+    const params = new URLSearchParams();
+
+    params.set('pagina', pagina); // agregamos el parametro
+
+    // solo se envia el filtro solicitado
     const busqueda = filtros.busqueda.trim();
     if (busqueda) params.set('busqueda', busqueda);
 
-    // POR QUE new Date(...).toISOString()?
-    // El <input type="date"> da solo el dia ("2026-10-05"), sin hora ni zona
-    // horaria. La base de datos guarda las fechas en UTC (hora de Londres),
-    // pero el usuario piensa en SU dia (Colombia es UTC-5). Si mandaramos
-    // "2026-10-05" tal cual, una venta hecha a las 8 p.m. hora Colombia
-    // (01:00 UTC del dia 6) quedaria en el dia equivocado.
-    // Solucion: construimos el inicio y el fin del dia en HORA LOCAL del
-    // navegador (sin "Z" al final JavaScript lo interpreta como local) y lo
-    // convertimos a ISO/UTC con toISOString(); el servidor lo entiende exacto.
+    // tratamos la fecha para coincida con la de la base de datos y mili segundos
     if (filtros.desde) {
-        params.set('desde', new Date(`${filtros.desde}T00:00:00`).toISOString()); // 12:00:00 a.m. del dia
+        // parametro fecha desde => 12:00:00 am del dia
+        params.set('desde', new Date(`${filtros.desde}T00:00:00`).toISOString()); 
     }
     if (filtros.hasta) {
-        params.set('hasta', new Date(`${filtros.hasta}T23:59:59.999`).toISOString()); // ultimo milisegundo del dia
+        // ultimo milisegundo del dia. OJO: los milisegundos van despues de un PUNTO
+        // (59.999). Con dos puntos (59:999) la fecha es invalida y toISOString() revienta
+        params.set('hasta', new Date(`${filtros.hasta}T23:59:59.999`).toISOString());
     }
 
     return params.toString();
-};
+}
 
-// Cuando el backend rechaza eliminar/reactivar por stock, responde asi:
-//   { msg: 'No se puede reactivar la factura', errores: ['No hay suficiente stock de "X" (disponible: 3, requerido: 58)'] }
+
+
+
+// El backend, cuando rechaza eliminar/reactivar por stock, responde asi:
+//   { msg: 'No se puede eliminar la factura', errores: ['No se puede quitar el stock de "X"...'] }
 // Esta funcion junta el mensaje general con cada error de la lista para que el
-// usuario vea el MOTIVO y no solo "No se puede reactivar la factura".
+// usuario vea el MOTIVO y no solo "No se puede eliminar la factura".
 const armarMensajeError = (error, mensajePorDefecto) => {
     const msg = error.response?.data?.msg || mensajePorDefecto;
     const errores = error.response?.data?.errores;
@@ -64,42 +51,27 @@ const armarMensajeError = (error, mensajePorDefecto) => {
         : msg;
 }
 
-const FacturaVentaProvider = ({children}) => {
+// Funcion principal de elementos
+const FacturaProveedorProvider = ({children}) => {
 
     // usuario autenticado
     const {auth} = useAuth();
 
-    // OJO: antes aca se usaba useEmpresa() para mandar "empresa_fc_id" al
-    // crear una factura. Se saco: GET /empresa es SOLO PARA ADMIN, asi que
-    // un VENDEDOR nunca conseguia ese dato y la factura fallaba con "Debe
-    // indicar cliente, empresa y al menos un producto". Ahora el backend
-    // (registrarFacturaCliente) averigua la empresa el solo -- ver el
-    // comentario en facturaClienteController.js
+    // Facturas Activas proveedor
 
-    // =================================================================
-    //  PASO B -- Estado (la "memoria" del Provider)
-    // =================================================================
-
-    // --- Facturas ACTIVAS: solo la pagina que se esta viendo ---
-    // Ya no se cargan todas: el backend filtra y pagina (ver
-    // consultarFacturasPaginadas en facturaClienteController.js).
     const [facturas, setFacturas] = useState([]);
     const [paginacionFactura, setPaginacionFactura] = useState(PAGINACION_VACIA);
-    // filtros que estan APLICADOS ahora mismo (para que "Siguiente pagina"
-    // siga filtrando igual, y para escribir el mensaje "no se encontraron...")
-    const [filtrosFactura, setFiltrosFactura] = useState(FILTROS_VACIOS);
+    const [filtrosFactura, setFiltrosFactura] = useState(FILTROS_VACIOS); // siguiente pagina filtra igual
 
-    // --- Facturas ELIMINADAS: lo mismo, con su propio estado ---
-    // (se piden solo cuando se abre ese modal, no apenas se entra a la pagina)
+    // --- Facturas ELIMINADAS
     const [facturasEliminadas, setFacturasEliminadas] = useState([]);
-    const [paginacionFacturaEliminada, setPaginacionFacturaEliminada] = useState(PAGINACION_VACIA);
+    const [paginacionFacturaEliminada, setPaginacionFacturaEliminada] = useState(PAGINACION_VACIA);    
     const [filtrosFacturaEliminada, setFiltrosFacturaEliminada] = useState(FILTROS_VACIOS);
 
     // la factura que se esta viendo en el modal de detalle
     const [facturaSeleccionada, setFacturaSeleccionada] = useState(null);
 
-    // modales (la de "nueva factura" ya no es un modal -- ahora /factura-venta
-    // es una pagina dedicada solo a eso, ver AmdinFacturaVenta.jsx)
+    // modales
     const [modalDetalle, setModalDetalle] = useState(false);
     const [modalEliminadas, setModalEliminadas] = useState(false);
 
@@ -118,68 +90,66 @@ const FacturaVentaProvider = ({children}) => {
         }
     }
 
-    // =================================================================
-    //  PASO C -- Pedir facturas ACTIVAS al backend
-    // =================================================================
-    // pagina  -> que pagina pedir (por defecto la 1)
-    // filtros -> que filtros aplicar (por defecto los que ya estan aplicados)
+    // Obtener las facturas activas al backend
     const obtenerFacturas = async (pagina = 1, filtros = filtrosFactura) => {
         const config = generarConfig();
         if (!config) return;
 
         try {
-            // ej: /factura-cliente?pagina=1&busqueda=juan
-            const {data} = await clienteAxios(`/factura-cliente?${armarParametros(filtros, pagina)}`, config);
+            const parametrosURL = armarParametros(filtros, pagina);
+            const url = `/factura-proveedor?${parametrosURL}`;
+            const {data} = await clienteAxios(url, config);
 
-            // CASO BORDE: estabas en la pagina 3, eliminaste la unica factura
-            // que habia ahi y la pagina 3 quedo vacia. En vez de mostrar una
-            // lista vacia con "Pagina 3 de 2", retrocedemos una pagina.
-            if (data.listaFacturaCliente.length === 0 && pagina > 1) {
+            // eliminar paginacion si elimina producto final
+            if (data.listaFacturaProveedor.length === 0 && pagina > 1) {
                 return obtenerFacturas(pagina - 1, filtros);
             }
 
-            setFacturas(data.listaFacturaCliente);
+            // agregamos la lista para exportar
+            setFacturas(data.listaFacturaProveedor);
             setPaginacionFactura(data.paginacion);
+
         } catch (error) {
             console.log(error.response?.data?.msg || error.message);
         }
     }
 
-    // buscar: guarda los filtros nuevos y SIEMPRE vuelve a la pagina 1
-    // (si buscas "juan" estando en la pagina 4, la pagina 4 del resultado
-    // nuevo probablemente no existe).
-    const buscarFactura = async (filtros) => {
+    // buscar: devuelve siempre a la pagina 1
+    const buscarFactura = async filtros => {
         setFiltrosFactura(filtros);
         await obtenerFacturas(1, filtros);
     }
 
-    // cambiar de pagina manteniendo los filtros que ya estaban aplicados
-    const cambiarPaginaFactura = async (pagina) => {
+    // cambiara pagina para facturas activadas
+    const cambiarPaginaFactura = async pagina => {
         await obtenerFacturas(pagina, filtrosFactura);
     }
 
-    // =================================================================
-    //  PASO D -- Pedir facturas ELIMINADAS (identico, otra ruta y otro estado)
-    // =================================================================
+    // Facturas Eliminadas
     const obtenerFacturasEliminadas = async (pagina = 1, filtros = filtrosFacturaEliminada) => {
         const config = generarConfig();
         if (!config) return;
 
         try {
-            const {data} = await clienteAxios(`/factura-cliente/eliminados?${armarParametros(filtros, pagina)}`, config);
+            const parametrosURL = armarParametros(filtros, pagina);
+            const url = `/factura-proveedor/eliminados?${parametrosURL}`;
+            const {data} = await clienteAxios(url, config);
 
-            // mismo retroceso de pagina que arriba
-            if (data.listaFacturaClienteEliminadas.length === 0 && pagina > 1) {
+            // eliminar paginacion si elimina producto final
+            if (data.listaFacturaProveedorEliminadas.length === 0 && pagina > 1) {
                 return obtenerFacturasEliminadas(pagina - 1, filtros);
             }
 
-            setFacturasEliminadas(data.listaFacturaClienteEliminadas);
+            // agregamos la lista para exportar
+            setFacturasEliminadas(data.listaFacturaProveedorEliminadas);
             setPaginacionFacturaEliminada(data.paginacion);
+
         } catch (error) {
             console.log(error.response?.data?.msg || error.message);
         }
     }
 
+    // buscar las facturas eliminadas
     const buscarFacturaEliminada = async (filtros) => {
         setFiltrosFacturaEliminada(filtros);
         await obtenerFacturasEliminadas(1, filtros);
@@ -198,34 +168,25 @@ const FacturaVentaProvider = ({children}) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [auth]);
 
-    // =================================================================
-    //  PASO E -- Acciones sobre una factura
-    // =================================================================
+    // Acciones sobre una factura
 
-    // registrar una factura nueva. "datos" = { cliente_id, productos: [{producto_dc_id, cantidad_dc_venta}, ...] }
+    // registrar
     const guardarFactura = async datos => {
         const config = generarConfig();
         if (!config) return;
-
         try {
             const payload = {
-                cliente_id: datos.cliente_id,
+                proveedor_id: datos.proveedor_id,
                 productos: datos.productos
-                // ya no se manda "empresa_fc_id": el backend la averigua solo
             };
 
-            const {data} = await clienteAxios.post('/factura-cliente', payload, config);
-
-            // Antes aqui se llamaba obtenerFacturas() para refrescar la lista.
-            // Ya no hace falta: esta pantalla (/factura-venta) solo CREA
-            // facturas y no muestra ninguna lista; el historial tiene su
-            // propio Provider y pide los datos frescos cuando entras a el.
+            const {data} = await clienteAxios.post('/factura-proveedor', payload, config);
 
             return {
                 msg: 'La factura se registro correctamente',
                 // id de la factura recien creada -- se usa para descargar
                 // el PDF apenas se guarda, sin tener que ir a buscarla
-                facturaId: data.factura?.id_fact_cli
+                facturaId: data.factura?.id_fact_prov 
             };
 
         } catch (error) {
@@ -238,7 +199,8 @@ const FacturaVentaProvider = ({children}) => {
         }
     }
 
-    // eliminar (soft delete): el backend devuelve el stock de cada producto
+
+    // eliminar (soft delete): el backend quita el stock de cada producto validando primero que alcance para TODOS
     const eliminarFactura = async id => {
 
         // validar que se admin
@@ -250,19 +212,17 @@ const FacturaVentaProvider = ({children}) => {
             return;
         }
 
-        const confirmar = confirm('¿Confirma que desea eliminar esta factura? El stock de los productos se devolvera.');
+        const confirmar = confirm('¿Confirma que desea eliminar esta factura? Se descontara del stock lo que esta compra habia sumado.');
         if (!confirmar) return;
 
         try {
             const config = generarConfig();
             if (!config) return;
 
-            const url = `/factura-cliente/eliminar/${id}`;
+            const url = `/factura-proveedor/eliminar/${id}`;
             const {data} = await clienteAxios.put(url, {}, config);
 
-            // refrescar AMBAS listas quedandonos en la misma pagina y con
-            // los mismos filtros (si la pagina quedo vacia, obtenerFacturas
-            // retrocede sola una pagina)
+            // refrescar AMBAS listas quedandonos en la misma pagina 
             await obtenerFacturas(paginacionFactura.paginaActual);
             await obtenerFacturasEliminadas(paginacionFacturaEliminada.paginaActual);
 
@@ -272,7 +232,7 @@ const FacturaVentaProvider = ({children}) => {
             return { msg: data.msg };
 
         } catch (error) {
-            // avisar en pantalla el MOTIVO por el que no se pudo
+            // avisar en pantalla el MOTIVO (ej. "parte de esa mercancia ya se vendio")
             const msg = armarMensajeError(error, 'No se pudo eliminar la factura');
             setAlerta({ msg, error: true });
 
@@ -280,8 +240,8 @@ const FacturaVentaProvider = ({children}) => {
         }
     }
 
-    // reactivar una factura eliminada: el backend vuelve a descontar el
-    // stock, validando primero que alcance para TODOS los productos
+    // reactivar una factura eliminada: el backend vuelve a SUMAR al stock lo que
+    // la compra habia traido
     const reactivarFactura = async id => {
 
         // validar que sea admin (el backend tambien lo valida)
@@ -293,14 +253,14 @@ const FacturaVentaProvider = ({children}) => {
             return;
         }
 
-        const confirmar = confirm('¿Desea reactivar esta factura? Se volvera a descontar el stock de los productos.');
+        const confirmar = confirm('¿Desea reactivar esta factura? Se volvera a sumar al stock lo que esta compra trae.');
         if (!confirmar) return;
 
         try {
             const config = generarConfig();
             if (!config) return;
 
-            const url = `/factura-cliente/${id}`;
+            const url = `/factura-proveedor/${id}`;
             const {data} = await clienteAxios.patch(url, {}, config);
 
             await obtenerFacturasEliminadas(paginacionFacturaEliminada.paginaActual);
@@ -311,8 +271,6 @@ const FacturaVentaProvider = ({children}) => {
             return { msg: data.msg };
 
         } catch (error) {
-            // aqui cae, por ejemplo, "No hay suficiente stock de X (disponible: 3, requerido: 58)":
-            // antes ese motivo se perdia y el usuario solo veia que "no pasaba nada"
             const msg = armarMensajeError(error, 'No se pudo reactivar la factura');
             setAlerta({ msg, error: true });
 
@@ -341,7 +299,7 @@ const FacturaVentaProvider = ({children}) => {
             const config = generarConfig();
             if (!config) return;
 
-            const respuesta = await clienteAxios.get(`/factura-cliente/factura-pdf/${id}`, {
+            const respuesta = await clienteAxios.get(`/factura-proveedor/factura-pdf/${id}`, {
                 ...config,
                 responseType: 'blob'
             });
@@ -352,7 +310,7 @@ const FacturaVentaProvider = ({children}) => {
             const url = window.URL.createObjectURL(new Blob([respuesta.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `recibo_venta_${id}.pdf`);
+            link.setAttribute('download', `recibo_compra_${id}.pdf`);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -377,7 +335,7 @@ const FacturaVentaProvider = ({children}) => {
     }
 
     return (
-        <FacturaVentaContext.Provider
+        <FacturaProveedorContext.Provider
             value={{
                 // lista activa + filtros + paginacion
                 facturas,
@@ -414,12 +372,10 @@ const FacturaVentaProvider = ({children}) => {
             }}
         >
             {children}
-        </FacturaVentaContext.Provider>
+        </FacturaProveedorContext.Provider>
     )
 }
 
-export {
-    FacturaVentaProvider
-}
 
-export default FacturaVentaContext;
+export default FacturaProveedorContext;
+export {FacturaProveedorProvider};

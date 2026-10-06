@@ -34,6 +34,9 @@ import AdminProductos from './pages/productos/AdminProductos';
 import AmdinFacturaVenta from './pages/facturaVenta/AmdinFacturaVenta';
 import HistorialFacturaVenta from './pages/facturaVenta/HistorialFacturaVenta';
 
+import AdminFacturaProveedor from './pages/facturaProveedor/AdminFacturaProveedor';
+import HistorialFacturaProveedor from './pages/facturaProveedor/HistorialFacturaProveedor';
+
 import { AuthProvider } from './context/AuthProvider';
 import { UsersProvider } from './context/UsersProvider';
 import { FacturaVentaProvider } from './context/FacturaVentaProvider';
@@ -42,6 +45,7 @@ import { ProveedorProvider } from './context/ProveedorProvider';
 import { EmpresaProvider } from './context/EmpresaProvider';
 import { MarcaProvider } from './context/MarcaProvider';
 import { ProductosProvider } from './context/ProductosProvider';
+import { FacturaProveedorProvider } from './context/FacturaProveedorProvider';
 
 
 function App() {
@@ -77,7 +81,7 @@ function App() {
                   </ProductosProvider>
                 </ClientesProvider>
               }/>
-
+              
               {/* historial: facturas activas y eliminadas, sin crear nada aca */}
               <Route path='facturas-historial' element={
                 <FacturaVentaProvider key="factura-historial"> <HistorialFacturaVenta /> </FacturaVentaProvider>
@@ -143,6 +147,23 @@ function App() {
 
                 <Route path='admin-marcas/eliminados' element={
                   <MarcaProvider key="marcas-eliminadas"><AdminMarcasEliminadas /></MarcaProvider>
+                } />
+
+                {/* Facturas de proveedor: CREAR (/factura-compra). El historial de compras
+                    esta en /facturas-compra (ver mas abajo), igual que en ventas:
+                    /factura-venta crea y /facturas-historial lista */}
+                <Route path='factura-compra' element={
+                  <ProveedorProvider key="proveedor-para-facturaProveedor">
+                    <ProductosProvider key="producto-para-facturaProveedor">
+                      <FacturaProveedorProvider key="factura-proveedor-crear"> <AdminFacturaProveedor /> </FacturaProveedorProvider>
+                    </ProductosProvider>
+                  </ProveedorProvider>
+                } />
+
+                {/* Facturas de proveedor: HISTORIAL (activas y eliminadas). No necesita
+                    ProveedorProvider ni ProductosProvider: solo consulta lo ya registrado */}
+                <Route path='facturas-compra' element={
+                  <FacturaProveedorProvider key="factura-proveedor-historial"> <HistorialFacturaProveedor /> </FacturaProveedorProvider>
                 } />
 
               </Route>

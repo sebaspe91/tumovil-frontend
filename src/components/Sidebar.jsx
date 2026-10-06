@@ -77,9 +77,10 @@ const menuItems = [
         icon: FaFileInvoice,
         roles: ['ADMIN', 'VENDEDOR'],
         submenu: [
-            { label: 'Facturas Ventas', to: '/factura-venta', icon: FaFileInvoiceDollar, roles: ['ADMIN', 'VENDEDOR'] },
-            { label: 'Facturas proveedor', to: '/factura-proveedor', icon: FaTruck, roles: ['ADMIN'] }, // solo admin
-            { label: 'Historial Facturas', to: '/facturas-historial', icon: FaHistory, roles: ['ADMIN'] }, // solo admin
+            { label: 'Resgistrar Venta', to: '/factura-venta', icon: FaFileInvoiceDollar, roles: ['ADMIN', 'VENDEDOR'] },
+            { label: 'Registrar Compra', to: '/factura-compra', icon: FaTruck, roles: ['ADMIN'] }, // solo admin
+            { label: 'Facturas ventas', to: '/facturas-historial', icon: FaHistory, roles: ['ADMIN'] }, // solo admin
+            { label: 'Facturas compras', to: '/facturas-compra', icon: FaHistory, roles: ['ADMIN'] }, // solo admin
         ]
     },
     {

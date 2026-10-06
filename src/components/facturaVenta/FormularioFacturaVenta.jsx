@@ -63,16 +63,34 @@ function FormularioFacturaVenta() {
         ));
     }
 
-    // se llama cuando el campo de cantidad pierde el foco (onBlur): aca si
-    // se corrige de una vez si quedo vacio, en 0, o se paso del stock
+    // se llama cuando el campo de cantidad pierde el foco (onBlur): aca se
+    // corrige de una vez si quedo vacio o en 0 (minimo 1).
+    // OJO: ya NO se recorta al stock. Antes, si escribias una cantidad mayor al
+    // stock, al salir del campo se cambiaba sola y el usuario no entendia por que.
+    // Ahora el campo se queda en ROJO con un mensaje (ver "excedeStock" mas abajo)
+    // y no se puede generar la factura hasta corregirlo.
     const corregirCantidad = idProducto => {
         setLineas(anteriores => anteriores.map(linea => {
             if (linea.producto.id_producto !== idProducto) return linea;
 
-            const cantidad = Math.max(1, Math.min(Number(linea.cantidad) || 1, linea.producto.cantidad_prod));
+            const cantidad = Math.max(1, Number(linea.cantidad) || 1);
             return { ...linea, cantidad };
         }));
     }
+
+    // la cantidad escrita es MAYOR que el stock disponible de ese producto?
+    const excedeStock = linea => Number(linea.cantidad) > linea.producto.cantidad_prod;
+
+    // boton "Usar maximo": deja la cantidad en el stock disponible
+    const handleUsarMaximo = idProducto => {
+        setLineas(anteriores => anteriores.map(linea =>
+            linea.producto.id_producto === idProducto
+                ? { ...linea, cantidad: linea.producto.cantidad_prod }
+                : linea
+        ));
+    }
+
+    const hayExceso = lineas.some(excedeStock);
 
     const handleQuitarLinea = idProducto => {
         setLineas(anteriores => anteriores.filter(linea => linea.producto.id_producto !== idProducto));
@@ -91,6 +109,12 @@ function FormularioFacturaVenta() {
 
         if (lineas.length === 0) {
             setAlerta({ msg: 'Debe agregar al menos un producto', error: true });
+            return;
+        }
+
+        // si alguna cantidad supera el stock no se manda nada al backend
+        if (hayExceso) {
+            setAlerta({ msg: 'Hay productos con una cantidad mayor al stock disponible (marcados en rojo)', error: true });
             return;
         }
 
@@ -193,9 +217,11 @@ function FormularioFacturaVenta() {
                 {lineas.length ? (
                     <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100 mt-2">
                         {lineas.map(linea => (
-                            <div key={linea.producto.id_producto} className="flex flex-col sm:grid sm:grid-cols-[2fr_90px_110px_110px_30px] gap-2 sm:items-center px-4 py-3 text-sm">
+                            <div key={linea.producto.id_producto} className="flex flex-col gap-1 px-4 py-3 text-sm">
+                            <div className="flex flex-col sm:grid sm:grid-cols-[2fr_90px_110px_110px_30px] gap-2 sm:items-center">
                                 <span className="font-semibold text-primary-700">{linea.producto.nombre_prod}</span>
 
+                                {/* si la cantidad supera el stock el campo se pinta de rojo */}
                                 <input
                                     type="number"
                                     min="1"
@@ -203,7 +229,7 @@ function FormularioFacturaVenta() {
                                     value={linea.cantidad}
                                     onChange={e => handleCambiarCantidad(linea.producto.id_producto, e.target.value)}
                                     onBlur={() => corregirCantidad(linea.producto.id_producto)}
-                                    className="border-2 p-1 rounded-lg w-20 sm:w-full text-center"
+                                    className={`border-2 p-1 rounded-lg w-20 sm:w-full text-center ${excedeStock(linea) ? 'bg-red-100 border-red-500 text-red-700 font-bold' : ''}`}
                                 />
 
                                 <span className="text-gray-500">$ {Number(linea.producto.precio_venta).toLocaleString('es-CO')}</span>
@@ -218,6 +244,21 @@ function FormularioFacturaVenta() {
                                 >
                                     &times;
                                 </button>
+                            </div>
+
+                            {/* mensaje: por que esta en rojo y como arreglarlo */}
+                            {excedeStock(linea) && (
+                                <p className="text-xs text-red-600 font-semibold">
+                                    Solo hay {linea.producto.cantidad_prod} unidad(es) en stock de este producto.{' '}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleUsarMaximo(linea.producto.id_producto)}
+                                        className="underline hover:text-red-800"
+                                    >
+                                        Usar {linea.producto.cantidad_prod}
+                                    </button>
+                                </p>
+                            )}
                             </div>
                         ))}
                     </div>

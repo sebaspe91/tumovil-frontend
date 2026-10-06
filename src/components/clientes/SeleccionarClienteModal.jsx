@@ -13,8 +13,6 @@ function SeleccionarClienteModal({ abierto, onClose, onElegir }) {
         nuevoCliente, modalFormularioCliente, cerrarModalFormularioCliente
     } = useClientes();
 
-    const clientesActivos = clientes.filter(cliente => cliente.estado_cli);
-
     // se llama cuando FormularioCliente termina de registrar un cliente
     // NUEVO. Ademas de lo que FormularioCliente ya hace solo (mostrar el
     // mensaje de exito y cerrarse el mismo a los 1200ms), aca APROVECHAMOS
@@ -38,7 +36,7 @@ function SeleccionarClienteModal({ abierto, onClose, onElegir }) {
                 onClose={onClose}
                 onElegir={onElegir}
                 titulo="Seleccionar Cliente"
-                items={clientesActivos}
+                items={clientes}
                 busqueda={busquedaCliente}
                 onBuscar={buscarCliente}
                 placeholderBusqueda="Buscar por nombre, apellido o cedula"
